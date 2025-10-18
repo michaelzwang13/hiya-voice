@@ -1,0 +1,24 @@
+{
+  "name": "hiya-voice-assistant",
+  "version": "0.1.0",
+  "description": "Voice-powered form filling assistant for accessibility",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --mode development --watch",
+    "build": "bun run type-check && vite build && bun run post-build",
+    "post-build": "mkdir -p dist/icons && cp public/icons/*.png dist/icons/",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.12.7",
+    "@types/webextension-polyfill": "^0.10.7",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10",
+    "vite-plugin-web-extension": "^4.1.4"
+  }
+}

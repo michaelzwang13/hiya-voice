@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiya Voice Assistant</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Hiya Voice Assistant</h1>
+      <p class="subtitle">Voice-powered form filling</p>
+    </header>
+
+    <main>
+      <section class="status-section">
+        <div class="status-item">
+          <span class="label">Forms detected:</span>
+          <span class="value" id="forms-count">-</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Fields detected:</span>
+          <span class="value" id="fields-count">-</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Required fields:</span>
+          <span class="value" id="required-count">-</span>
+        </div>
+      </section>
+
+      <section class="actions-section">
+        <button id="detect-forms" class="btn btn-primary">
+          Detect Forms
+        </button>
+        <button id="toggle-voice" class="btn btn-secondary">
+          Start Voice (Alt+V)
+        </button>
+      </section>
+
+      <section class="info-section">
+        <h2>Quick Start</h2>
+        <ol>
+          <li>Navigate to a page with a form</li>
+          <li>Click "Detect Forms" or press Alt+V</li>
+          <li>Use voice commands to fill the form</li>
+        </ol>
+
+        <h3>Voice Commands</h3>
+        <ul class="commands-list">
+          <li><strong>Next</strong> - Move to next field</li>
+          <li><strong>Previous</strong> - Move to previous field</li>
+          <li><strong>Fill [text]</strong> - Fill current field</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p class="version">v0.1.0 - Day 1 MVP</p>
+    </footer>
+  </div>
+
+  <script src="popup.ts" type="module"></script>
+</body>
+</html>

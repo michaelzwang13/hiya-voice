@@ -1,0 +1,38 @@
+export interface FormField {
+  element: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  type: FieldType;
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  value: string;
+  id: string;
+}
+
+export type FieldType =
+  | 'text'
+  | 'email'
+  | 'phone'
+  | 'number'
+  | 'date'
+  | 'url'
+  | 'password'
+  | 'textarea'
+  | 'select'
+  | 'checkbox'
+  | 'radio'
+  | 'file'
+  | 'unknown';
+
+export interface FormInfo {
+  fields: FormField[];
+  formElement: HTMLFormElement | null;
+  totalFields: number;
+  requiredFields: number;
+  filledFields: number;
+}
+
+export interface VoiceCommand {
+  type: 'fill' | 'next' | 'previous' | 'submit' | 'insert' | 'review' | 'unknown';
+  text: string;
+  target?: string;
+}
