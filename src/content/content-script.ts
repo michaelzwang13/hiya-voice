@@ -23,7 +23,13 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
   switch (message.type) {
     case 'DETECT_FORMS': {
       const formInfo = formDetector.detectForms();
-      sendResponse({ formInfo });
+      const state = formDetector.getFormState();
+      sendResponse({
+        formInfo: {
+          ...formInfo,
+          ...state,
+        }
+      });
       break;
     }
 
