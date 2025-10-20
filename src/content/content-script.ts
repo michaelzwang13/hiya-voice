@@ -59,13 +59,24 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
     }
 
     case 'GET_FORM_STATE': {
-      const fields = formDetector.getFields();
+      const state = formDetector.getFormState();
       const currentField = formDetector.getCurrentField();
       sendResponse({
-        fields,
+        ...state,
         currentField,
-        totalFields: fields.length,
       });
+      break;
+    }
+
+    case 'GOTO_UNFILLED': {
+      const field = formDetector.goToFirstUnfilledRequired();
+      if (field) {
+        showNotification(`Jumped to: ${field.label}`);
+        sendResponse({ success: true, field });
+      } else {
+        showNotification('All required fields are filled!');
+        sendResponse({ success: false, message: 'All required fields filled' });
+      }
       break;
     }
 

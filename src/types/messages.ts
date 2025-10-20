@@ -12,5 +12,6 @@ export type MessageType =
   | 'FILL_FIELD'
   | 'NEXT_FIELD'
   | 'PREVIOUS_FIELD'
+  | 'GOTO_UNFILLED'
   | 'GET_FORM_STATE'
   | 'FORM_STATE_RESPONSE';

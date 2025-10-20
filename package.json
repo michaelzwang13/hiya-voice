@@ -1,6 +1,6 @@
 {
   "name": "hiya-voice-assistant",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Voice-powered form filling assistant for accessibility",
   "type": "module",
   "scripts": {

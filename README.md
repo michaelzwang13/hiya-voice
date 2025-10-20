@@ -2,7 +2,7 @@
 
 Voice-powered form filling assistant for accessibility. Helps users with visual or physical impairments fill out forms using voice commands.
 
-## Day 1 - MVP Setup Complete
+## Day 2 - Form Parsing Intelligence Complete ✅
 
 ### Project Structure
 ```
@@ -20,13 +20,26 @@ hiya-voice/
 └── package.json
 ```
 
-### Features (Day 1)
+### Features Complete
+
+**Day 1:**
 - ✅ Chrome extension with TypeScript + Vite
 - ✅ Manifest V3 with required permissions
 - ✅ Content script that injects into web pages
 - ✅ DOM form detector (finds all input/textarea/select elements)
 - ✅ Basic popup UI showing form statistics
 - ✅ Keyboard shortcut (Alt+V) for voice toggle
+
+**Day 2:**
+- ✅ Enhanced field type detection (20+ field types including name, address, city, state, zip, company, jobTitle)
+- ✅ Intelligent label extraction (11 different methods including aria attributes, siblings, headings)
+- ✅ Visual field highlighting with purple outline
+- ✅ Field navigation system (next/previous with smooth scrolling)
+- ✅ Form state manager (tracks completion, filled vs required fields)
+- ✅ Progress bar showing form completion percentage
+- ✅ "Go to First Unfilled" feature
+- ✅ Current field display in popup
+- ✅ Autocomplete attribute detection for better field classification
 
 ## Installation & Setup
 
@@ -53,17 +66,30 @@ bun run dev
 
 ## Testing
 
-### Test on Google Forms
-1. Navigate to [Google Forms](https://docs.google.com/forms/)
-2. Open any form or create a test form
-3. Click the Hiya extension icon (or press Alt+V)
-4. Click "Detect Forms" in the popup
-5. You should see the number of fields detected
+### Test Navigation Features
+1. Navigate to any page with a form (try [Google Forms](https://docs.google.com/forms/))
+2. Click the Hiya extension icon
+3. Click "Refresh Forms" to detect fields
+4. Try navigation buttons:
+   - **Next →** - Moves to next field (purple highlight appears)
+   - **← Previous** - Goes back one field
+   - **Go to First Unfilled** - Jumps to first empty required field
+5. Watch the progress bar update as you fill fields
+6. See current field info appear in the "Current Field" section
+
+### Features to Test
+- **Field Detection**: Should find all visible inputs, textareas, and selects
+- **Label Extraction**: Check that field labels are correctly identified
+- **Type Detection**: Verify field types (email, phone, name, etc.) in Current Field display
+- **Visual Highlighting**: Purple outline appears around focused field
+- **Progress Tracking**: Progress bar updates as fields are filled
+- **Smart Navigation**: "Go to First Unfilled" skips to incomplete required fields
 
 ### Console Logs
-Open Chrome DevTools (F12) and check the console for:
+Open Chrome DevTools (F12) and check for:
 - `[Hiya] Content script loaded`
 - `[Hiya] Detected X form fields`
+- Field labels and types in console
 
 ## Development Commands
 
@@ -78,11 +104,13 @@ bun run dev
 bun run build
 ```
 
-## Next Steps (Day 2)
-- Build field classifier (detect field types: email, name, phone, text, etc.)
-- Implement label/placeholder/aria-label extraction logic
-- Create field navigation system (next/previous field focusing)
-- Build form state manager (track which fields filled, required fields)
+## Next Steps (Day 3)
+- Integrate Web Speech API (SpeechRecognition) with TypeScript types
+- Implement Text-to-Speech to read field labels aloud
+- Create voice command parser (next, previous, fill, submit)
+- Build transcription → form filling logic
+- Add visual feedback UI (listening indicator, transcription display)
+- Test voice input on simple text fields
 
 ## Tech Stack
 - TypeScript

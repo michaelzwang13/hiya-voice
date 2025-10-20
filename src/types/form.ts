@@ -21,6 +21,16 @@ export type FieldType =
   | 'checkbox'
   | 'radio'
   | 'file'
+  | 'name'
+  | 'firstName'
+  | 'lastName'
+  | 'address'
+  | 'city'
+  | 'state'
+  | 'zip'
+  | 'country'
+  | 'company'
+  | 'jobTitle'
   | 'unknown';
 
 export interface FormInfo {

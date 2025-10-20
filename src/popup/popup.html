@@ -16,47 +16,57 @@
     <main>
       <section class="status-section">
         <div class="status-item">
-          <span class="label">Forms detected:</span>
-          <span class="value" id="forms-count">-</span>
-        </div>
-        <div class="status-item">
-          <span class="label">Fields detected:</span>
+          <span class="label">Total fields:</span>
           <span class="value" id="fields-count">-</span>
         </div>
         <div class="status-item">
-          <span class="label">Required fields:</span>
+          <span class="label">Filled fields:</span>
+          <span class="value" id="filled-count">-</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Required:</span>
           <span class="value" id="required-count">-</span>
         </div>
+        <div class="status-item progress-item">
+          <span class="label">Progress:</span>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+            <span class="progress-text" id="progress-text">0%</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="current-field-section" id="current-field-section" style="display: none;">
+        <h3>Current Field</h3>
+        <div class="field-info">
+          <div class="field-label" id="current-field-label">-</div>
+          <div class="field-type" id="current-field-type">-</div>
+        </div>
+      </section>
+
+      <section class="navigation-section">
+        <h3>Navigation</h3>
+        <div class="nav-buttons">
+          <button id="prev-field" class="btn btn-nav">← Previous</button>
+          <button id="next-field" class="btn btn-nav">Next →</button>
+        </div>
+        <button id="goto-unfilled" class="btn btn-outline">
+          Go to First Unfilled
+        </button>
       </section>
 
       <section class="actions-section">
         <button id="detect-forms" class="btn btn-primary">
-          Detect Forms
+          Refresh Forms
         </button>
         <button id="toggle-voice" class="btn btn-secondary">
           Start Voice (Alt+V)
         </button>
       </section>
-
-      <section class="info-section">
-        <h2>Quick Start</h2>
-        <ol>
-          <li>Navigate to a page with a form</li>
-          <li>Click "Detect Forms" or press Alt+V</li>
-          <li>Use voice commands to fill the form</li>
-        </ol>
-
-        <h3>Voice Commands</h3>
-        <ul class="commands-list">
-          <li><strong>Next</strong> - Move to next field</li>
-          <li><strong>Previous</strong> - Move to previous field</li>
-          <li><strong>Fill [text]</strong> - Fill current field</li>
-        </ul>
-      </section>
     </main>
 
     <footer>
-      <p class="version">v0.1.0 - Day 1 MVP</p>
+      <p class="version">v0.2.0 - Day 2</p>
     </footer>
   </div>
 
