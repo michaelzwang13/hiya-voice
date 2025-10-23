@@ -23,6 +23,28 @@ export class FormDetector {
       }
     });
 
+    const ariaElements = Array.from(
+      document.querySelectorAll('[role="radio"]')
+    );
+
+    const radioGroups: { [key: string]: Element[] } = {};
+
+    ariaElements.forEach((element) => {
+      const groupKey = element.className || 'default-group';
+      if (!radioGroups[groupKey]) {
+        radioGroups[groupKey] = [];
+      }
+      radioGroups[groupKey].push(element);
+    })
+
+    let index = 0;
+    for (const groupArray of Object.values(radioGroups)) {
+      const field = this.createAriaRadioField(groupArray, index);
+      if (field) {
+        this.fields.push(field);
+      }
+    }
+
     const formElement = document.querySelector('form');
     const requiredFields = this.fields.filter(f => f.required).length;
     const filledFields = this.fields.filter(f => f.value.trim() !== '').length;
@@ -66,6 +88,83 @@ export class FormDetector {
       value: this.getFieldValue(element),
       id: element.id || `hiya-field-${index}`,
     };
+  }
+
+  private createAriaRadioField(
+    elements: Element[],
+    index: number
+  ): FormField | null {
+    const hasVisibleElement = elements.some(el => {
+      const htmlEl = el as HTMLElement;
+      const style = window.getComputedStyle(htmlEl);
+      return (style.display !== 'none' &&
+              style.visibility != 'hidden' && 
+              htmlEl.offsetParent !== null);
+    })
+
+    if (!hasVisibleElement) {
+      return null;
+    }
+
+    let radioField: HTMLElement;
+    let label = 'Unlabeled radio group';
+    let required = false;
+    let id = `hiya-aria-radio-${index}`;
+
+    const radioGroup = elements[0].closest('[role="radiogroup"]');
+    if (radioGroup) {
+      radioField = radioGroup as HTMLElement;
+
+      // Check for aria-label first
+      if (radioField.hasAttribute("aria-label")) {
+        label = radioField.getAttribute("aria-label") || label;
+      }
+      // Then check for aria-labelledby
+      else if (radioField.hasAttribute("aria-labelledby")) {
+        const labelId = radioField.getAttribute("aria-labelledby");
+        if (labelId) {
+          const labelElement = document.getElementById(labelId);
+          label = labelElement?.textContent?.trim() || label;
+        }
+      }
+
+      // Get the radiogroup's id
+      id = radioField.id || id;
+
+      // Check if required
+      if (radioField.getAttribute("aria-required") === "true") {
+        required = true;
+      }
+    }
+    else {
+      radioField = elements[0] as HTMLElement;
+    }
+
+    // Find the checked element
+    const checkedElement = elements.find((el) => {
+      return el.getAttribute("aria-checked") === "true";
+    });
+
+    const value = checkedElement?.getAttribute("aria-label") ||
+                  checkedElement?.textContent?.trim() ||
+                  "";
+
+    // Extract all options
+    const options = elements.map(el =>
+      el.getAttribute("aria-label") || el.textContent?.trim() || ""
+    );
+
+    return {
+      element: radioField,
+      type: 'radio',
+      label,
+      required,
+      value,
+      id,
+      isAria: true,
+      ariaElements: elements.map(el => el as HTMLElement),
+      options,
+    }; 
   }
 
   /**
@@ -377,8 +476,30 @@ export class FormDetector {
     const field = this.getCurrentField();
     if (!field) return false;
 
-    field.element.value = value;
-    field.value = value;
+    // Handle ARIA elements differently
+    if (field.isAria) {
+      // For ARIA radios/checkboxes, set aria-checked
+      if (field.type === 'radio' && field.ariaElements) {
+        // Find the radio option that matches the value
+        field.ariaElements.forEach(el => {
+          const optionLabel = el.getAttribute('aria-label') || el.textContent?.trim() || '';
+          if (optionLabel === value) {
+            el.setAttribute('aria-checked', 'true');
+          } else {
+            el.setAttribute('aria-checked', 'false');
+          }
+        });
+      } else if (field.type === 'checkbox') {
+        field.element.setAttribute('aria-checked', value === 'checked' ? 'true' : 'false');
+      }
+      field.value = value;
+    } else {
+      // Native form elements
+      if ('value' in field.element) {
+        field.element.value = value;
+        field.value = value;
+      }
+    }
 
     // Trigger change event
     field.element.dispatchEvent(new Event('input', { bubbles: true }));
@@ -400,21 +521,35 @@ export class FormDetector {
   } {
     const totalFields = this.fields.length;
     const filledFields = this.fields.filter(f => {
-      const value = f.element.value?.trim();
-      if (f.type === 'checkbox' || f.type === 'radio') {
-        return (f.element as HTMLInputElement).checked;
+      if (f.isAria) {
+        // For ARIA elements, use the stored value
+        return f.value.trim() !== '';
       }
-      return value !== '';
+      if ('value' in f.element) {
+        const value = f.element.value?.trim();
+        if (f.type === 'checkbox' || f.type === 'radio') {
+          return (f.element as HTMLInputElement).checked;
+        }
+        return value !== '';
+      }
+      return false;
     }).length;
 
     const requiredFields = this.fields.filter(f => f.required).length;
     const requiredFilledFields = this.fields.filter(f => {
       if (!f.required) return false;
-      const value = f.element.value?.trim();
-      if (f.type === 'checkbox' || f.type === 'radio') {
-        return (f.element as HTMLInputElement).checked;
+      if (f.isAria) {
+        // For ARIA elements, use the stored value
+        return f.value.trim() !== '';
       }
-      return value !== '';
+      if ('value' in f.element) {
+        const value = f.element.value?.trim();
+        if (f.type === 'checkbox' || f.type === 'radio') {
+          return (f.element as HTMLInputElement).checked;
+        }
+        return value !== '';
+      }
+      return false;
     }).length;
 
     const completionPercentage = totalFields > 0
@@ -441,11 +576,18 @@ export class FormDetector {
   getUnfilledRequiredFields(): FormField[] {
     return this.fields.filter(f => {
       if (!f.required) return false;
-      const value = f.element.value?.trim();
-      if (f.type === 'checkbox' || f.type === 'radio') {
-        return !(f.element as HTMLInputElement).checked;
+      if (f.isAria) {
+        // For ARIA elements, use the stored value
+        return f.value.trim() === '';
       }
-      return value === '';
+      if ('value' in f.element) {
+        const value = f.element.value?.trim();
+        if (f.type === 'checkbox' || f.type === 'radio') {
+          return !(f.element as HTMLInputElement).checked;
+        }
+        return value === '';
+      }
+      return true;
     });
   }
 
@@ -482,4 +624,7 @@ export class FormDetector {
   getCurrentFieldIndex(): number {
     return this.currentFieldIndex;
   }
+
+  
+
 }

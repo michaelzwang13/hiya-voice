@@ -15,6 +15,7 @@ function generateManifest() {
 
 export default defineConfig({
   root: 'src',
+  publicDir: path.resolve(__dirname, 'public'),
   plugins: [
     webExtension({
       manifest: generateManifest,

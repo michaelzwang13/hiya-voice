@@ -1,11 +1,14 @@
 export interface FormField {
-  element: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  element: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLElement;
   type: FieldType;
   label: string;
   placeholder?: string;
   required: boolean;
   value: string;
   id: string;
+  isAria?: boolean;
+  ariaElements?: HTMLElement[];
+  options?: string[];
 }
 
 export type FieldType =
