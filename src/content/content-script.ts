@@ -160,16 +160,78 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
 /**
  * Speaks text using the Web Speech API
  */
-function speak(text: string) {
-  // Cancel any ongoing speech
-  window.speechSynthesis.cancel();
+function speak(text: string): Promise<void> {
+  return new Promise((resolve) => {
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 1.0; // Normal speed
-  utterance.pitch = 1.0; // Normal pitch
-  utterance.volume = 1.0; // Full volume
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0; // Normal speed
+    utterance.pitch = 1.0; // Normal pitch
+    utterance.volume = 1.0; // Full volume
 
-  window.speechSynthesis.speak(utterance);
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
+
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+/**
+ * Plays a beep sound
+ */
+function playBeep() {
+  const audioContext = new AudioContext();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.frequency.value = 800; // Frequency in Hz
+  oscillator.type = 'sine';
+
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+/**
+ * Starts speech recognition and returns the recognized text
+ */
+function startSpeechRecognition(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      reject(new Error('Speech recognition not supported'));
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      resolve(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      reject(new Error(event.error));
+    };
+
+    recognition.onend = () => {
+      // If no result was captured, resolve with empty string
+      resolve('');
+    };
+
+    recognition.start();
+    showNotification('Listening... Press Enter when done speaking');
+  });
 }
 
 /**
@@ -257,33 +319,84 @@ document.addEventListener('keydown', (event) => {
 /**
  * Handler functions for overlay events
  */
-function handleNextField() {
+async function handleNextField() {
   const field = formDetector.nextField();
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Now at: ${field.label}`);
-    speak(field.label);
+    await speak(field.label);
+
+    // Only trigger voice input for text fields (not radio, checkbox, etc.)
+    if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      playBeep();
+
+      try {
+        const transcript = await startSpeechRecognition();
+        if (transcript) {
+          formDetector.fillCurrentField(transcript);
+          showNotification(`Filled: ${transcript}`);
+          await speak(`Filled with: ${transcript}`);
+        }
+      } catch (error) {
+        console.error('[Hiya] Speech recognition error:', error);
+        showNotification('Speech recognition failed');
+      }
+    }
   }
 }
 
-function handlePreviousField() {
+async function handlePreviousField() {
   const field = formDetector.previousField();
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Now at: ${field.label}`);
-    speak(field.label);
+    await speak(field.label);
+
+    // Only trigger voice input for text fields (not radio, checkbox, etc.)
+    if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      playBeep();
+
+      try {
+        const transcript = await startSpeechRecognition();
+        if (transcript) {
+          formDetector.fillCurrentField(transcript);
+          showNotification(`Filled: ${transcript}`);
+          await speak(`Filled with: ${transcript}`);
+        }
+      } catch (error) {
+        console.error('[Hiya] Speech recognition error:', error);
+        showNotification('Speech recognition failed');
+      }
+    }
   }
 }
 
-function handleJumpToUnfilled() {
+async function handleJumpToUnfilled() {
   const field = formDetector.goToFirstUnfilledRequired();
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Jumped to: ${field.label}`);
-    speak(field.label);
+    await speak(field.label);
+
+    // Only trigger voice input for text fields (not radio, checkbox, etc.)
+    if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      playBeep();
+
+      try {
+        const transcript = await startSpeechRecognition();
+        if (transcript) {
+          formDetector.fillCurrentField(transcript);
+          showNotification(`Filled: ${transcript}`);
+          await speak(`Filled with: ${transcript}`);
+        }
+      } catch (error) {
+        console.error('[Hiya] Speech recognition error:', error);
+        showNotification('Speech recognition failed');
+      }
+    }
   } else {
     showNotification('All required fields are filled!');
-    speak('All required fields are filled!');
+    await speak('All required fields are filled!');
   }
 }
 
