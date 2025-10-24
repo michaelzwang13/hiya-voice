@@ -158,6 +158,18 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
 });
 
 /**
+ * Check if a field type should trigger voice input
+ */
+function shouldUseVoiceInput(fieldType: string): boolean {
+  const voiceInputTypes = [
+    'text', 'email', 'phone', 'number', 'url', 'textarea',
+    'name', 'firstName', 'lastName', 'address', 'city',
+    'state', 'zip', 'country', 'company', 'jobTitle'
+  ];
+  return voiceInputTypes.includes(fieldType);
+}
+
+/**
  * Speaks text using the Web Speech API
  */
 function speak(text: string): Promise<void> {
@@ -360,8 +372,8 @@ async function handleNextField() {
     console.log('[Hiya] Speaking field label:', field.label);
     await speak(field.label);
 
-    // Only trigger voice input for text fields (not radio, checkbox, etc.)
-    if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+    // Only trigger voice input for text-like fields (not radio, checkbox, etc.)
+    if (shouldUseVoiceInput(field.type)) {
       console.log('[Hiya] Text field detected, starting voice input. Type:', field.type);
       // Wait a bit to ensure TTS is completely done and audio buffer is clear
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -399,8 +411,8 @@ async function handlePreviousField() {
     showNotification(`Now at: ${field.label}`);
     await speak(field.label);
 
-    // Only trigger voice input for text fields (not radio, checkbox, etc.)
-    if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+    // Only trigger voice input for text-like fields (not radio, checkbox, etc.)
+    if (shouldUseVoiceInput(field.type)) {
       // Wait a bit to ensure TTS is completely done and audio buffer is clear
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -431,8 +443,8 @@ async function handleJumpToUnfilled() {
     showNotification(`Jumped to: ${field.label}`);
     await speak(field.label);
 
-    // Only trigger voice input for text fields (not radio, checkbox, etc.)
-    if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+    // Only trigger voice input for text-like fields (not radio, checkbox, etc.)
+    if (shouldUseVoiceInput(field.type)) {
       // Wait a bit to ensure TTS is completely done and audio buffer is clear
       await new Promise(resolve => setTimeout(resolve, 500));
 
