@@ -209,14 +209,27 @@ export class FormDetector {
       return el.getAttribute("aria-checked") === "true";
     });
 
-    const value = checkedElement?.getAttribute("aria-label") ||
-                  checkedElement?.textContent?.trim() ||
-                  "";
+    // Get value from first span only
+    let value = "";
+    if (checkedElement) {
+      const ariaLabel = checkedElement.getAttribute("aria-label");
+      if (ariaLabel) {
+        value = ariaLabel;
+      } else {
+        const firstSpan = checkedElement.querySelector('span');
+        value = firstSpan?.textContent?.trim() || checkedElement.textContent?.trim() || "";
+      }
+    }
 
-    // Extract all options
-    const options = elements.map(el =>
-      el.getAttribute("aria-label") || el.textContent?.trim() || ""
-    );
+    // Extract all options - get text from first span only
+    const options = elements.map(el => {
+      const ariaLabel = el.getAttribute("aria-label");
+      if (ariaLabel) return ariaLabel;
+
+      // Get text from first span only, not all nested content
+      const firstSpan = el.querySelector('span');
+      return firstSpan?.textContent?.trim() || el.textContent?.trim() || "";
+    });
 
     return {
       element: radioField,
@@ -326,15 +339,23 @@ export class FormDetector {
       el.getAttribute('aria-checked') === 'true'
     );
 
-    // Value is a comma-separated list of checked items
-    const value = checkedElements.map(el =>
-      el.getAttribute('aria-label') || el.textContent?.trim() || ''
-    ).join(', ');
+    // Value is a comma-separated list of checked items - get text from first span only
+    const value = checkedElements.map(el => {
+      const ariaLabel = el.getAttribute('aria-label');
+      if (ariaLabel) return ariaLabel;
 
-    // Extract all options
-    const options = elements.map(el =>
-      el.getAttribute('aria-label') || el.textContent?.trim() || ''
-    );
+      const firstSpan = el.querySelector('span');
+      return firstSpan?.textContent?.trim() || el.textContent?.trim() || '';
+    }).join(', ');
+
+    // Extract all options - get text from first span only
+    const options = elements.map(el => {
+      const ariaLabel = el.getAttribute('aria-label');
+      if (ariaLabel) return ariaLabel;
+
+      const firstSpan = el.querySelector('span');
+      return firstSpan?.textContent?.trim() || el.textContent?.trim() || '';
+    });
 
     return {
       element: checkboxField,
