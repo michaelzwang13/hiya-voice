@@ -7,6 +7,7 @@ console.log('[Hiya] Content script loaded');
 const formDetector = new FormDetector();
 let overlay: VoiceAssistantOverlay | null = null;
 let isExtensionEnabled = true;
+let activeRecognition: any = null; // Track active speech recognition
 
 // Check if extension is enabled
 chrome.storage.local.get(['extensionEnabled'], (result) => {
@@ -18,7 +19,7 @@ chrome.storage.local.get(['extensionEnabled'], (result) => {
 });
 
 // Detect forms when the page loads
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   if (!isExtensionEnabled) return;
 
   const formInfo = formDetector.detectForms();
@@ -27,10 +28,9 @@ window.addEventListener('load', () => {
   if (overlay) {
     overlay.updateFormStatus(formInfo);
 
-    // Show first field if available
+    // Don't auto-navigate to first field, just show welcome message
     if (formInfo.totalFields > 0) {
-      formDetector.nextField();
-      updateOverlayCurrentField();
+      await speak('Welcome to Hi ya Voice. Press Control V to start filling the form.');
     }
   }
 });
@@ -54,9 +54,9 @@ function initializeExtension() {
     const formInfo = formDetector.detectForms();
     overlay.updateFormStatus(formInfo);
 
+    // Don't auto-navigate to first field, just show welcome message
     if (formInfo.totalFields > 0) {
-      formDetector.nextField();
-      updateOverlayCurrentField();
+      speak('Welcome to Hi ya Voice. Press Control V to start filling the form.');
     }
   }
 }
@@ -203,6 +203,16 @@ function playBeep() {
  */
 function startSpeechRecognition(): Promise<string> {
   return new Promise((resolve, reject) => {
+    // Cancel any existing recognition first
+    if (activeRecognition) {
+      try {
+        activeRecognition.abort();
+      } catch (e) {
+        // Ignore errors when aborting
+      }
+      activeRecognition = null;
+    }
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
@@ -217,18 +227,22 @@ function startSpeechRecognition(): Promise<string> {
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
+      activeRecognition = null;
       resolve(transcript);
     };
 
     recognition.onerror = (event: any) => {
+      activeRecognition = null;
       reject(new Error(event.error));
     };
 
     recognition.onend = () => {
       // If no result was captured, resolve with empty string
+      activeRecognition = null;
       resolve('');
     };
 
+    activeRecognition = recognition;
     recognition.start();
     showNotification('Listening... Press Enter when done speaking');
   });
@@ -308,11 +322,21 @@ function showNotification(message: string, duration = 3000) {
 }
 
 // Listen for keyboard shortcuts
-document.addEventListener('keydown', (event) => {
-  // Alt+V to toggle overlay
-  if (event.altKey && event.key.toLowerCase() === 'v') {
+document.addEventListener('keydown', async (event) => {
+  // Control+V (or Command+V on Mac) to start voice filling (jump to first field)
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
     event.preventDefault();
-    overlay?.toggle();
+
+    // Get current field to check if we're already on a field
+    const currentField = formDetector.getCurrentField();
+
+    if (!currentField) {
+      // Not on any field yet, go to first field
+      await handleNextField();
+    } else {
+      // Already on a field, toggle overlay visibility
+      overlay?.toggle();
+    }
   }
 });
 
@@ -328,7 +352,13 @@ async function handleNextField() {
 
     // Only trigger voice input for text fields (not radio, checkbox, etc.)
     if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      // Wait a bit to ensure TTS is completely done and audio buffer is clear
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       playBeep();
+
+      // Small delay after beep before starting recognition
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       try {
         const transcript = await startSpeechRecognition();
@@ -354,7 +384,13 @@ async function handlePreviousField() {
 
     // Only trigger voice input for text fields (not radio, checkbox, etc.)
     if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      // Wait a bit to ensure TTS is completely done and audio buffer is clear
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       playBeep();
+
+      // Small delay after beep before starting recognition
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       try {
         const transcript = await startSpeechRecognition();
@@ -380,7 +416,13 @@ async function handleJumpToUnfilled() {
 
     // Only trigger voice input for text fields (not radio, checkbox, etc.)
     if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      // Wait a bit to ensure TTS is completely done and audio buffer is clear
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       playBeep();
+
+      // Small delay after beep before starting recognition
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       try {
         const transcript = await startSpeechRecognition();
