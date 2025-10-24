@@ -439,12 +439,23 @@ export class FormDetector {
             const headingElement = firstDiv.querySelector('[role="heading"]');
             console.log('[Hiya Debug - Radio/Checkbox] Heading element in first div:', headingElement);
 
-            if (headingElement?.textContent) {
-              const label = headingElement.textContent.trim();
-              console.log('[Hiya Debug - Radio/Checkbox] ✓✓✓ SUCCESS! Found label:', label);
-              return label;
+            if (headingElement) {
+              // Get only the first span within the heading (label text, not the asterisk)
+              const firstSpan = headingElement.querySelector('span');
+              if (firstSpan?.textContent) {
+                const label = firstSpan.textContent.trim();
+                console.log('[Hiya Debug - Radio/Checkbox] ✓✓✓ SUCCESS! Found label from first span:', label);
+                return label;
+              } else if (headingElement.textContent) {
+                // Fallback to full heading text if no span found
+                const label = headingElement.textContent.trim();
+                console.log('[Hiya Debug - Radio/Checkbox] ✓✓✓ SUCCESS! Found label from heading:', label);
+                return label;
+              } else {
+                console.log('[Hiya Debug - Radio/Checkbox] ✗ No heading text found');
+              }
             } else {
-              console.log('[Hiya Debug - Radio/Checkbox] ✗ No heading text found');
+              console.log('[Hiya Debug - Radio/Checkbox] ✗ No heading element found');
             }
           } else {
             console.log('[Hiya Debug - Radio/Checkbox] ✗ No first div found under jscontroller');
