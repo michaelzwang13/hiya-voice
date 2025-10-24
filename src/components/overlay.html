@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <div id="hiya-overlay" class="hiya-overlay">
+    <!-- Resize Handle -->
+    <div class="hiya-resize-handle"></div>
+
+    <!-- Header -->
+    <div class="hiya-header">
+      <div class="hiya-title">
+        <span class="hiya-icon">🎙️</span>
+        <span>Hiya Voice Assistant</span>
+      </div>
+      <button class="hiya-toggle-btn" id="hiya-toggle" title="Minimize (Alt+V)">
+        <span class="hiya-toggle-icon">−</span>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="hiya-content">
+      <!-- Status Section -->
+      <div class="hiya-status-section">
+        <div class="hiya-status-item">
+          <span class="hiya-label">Form Status:</span>
+          <span id="hiya-form-status" class="hiya-value">No form detected</span>
+        </div>
+        <div class="hiya-status-item">
+          <span class="hiya-label">Fields:</span>
+          <span id="hiya-fields-count" class="hiya-value">0</span>
+        </div>
+        <div class="hiya-status-item">
+          <span class="hiya-label">Progress:</span>
+          <div class="hiya-progress-container">
+            <div id="hiya-progress-bar" class="hiya-progress-bar" style="width: 0%"></div>
+            <span id="hiya-progress-text" class="hiya-progress-text">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Field Section -->
+      <div class="hiya-current-field-section">
+        <div class="hiya-section-title">Current Field</div>
+        <div class="hiya-current-field">
+          <div class="hiya-field-info">
+            <span id="hiya-field-index" class="hiya-field-index">-</span>
+            <span id="hiya-field-label" class="hiya-field-label">No field selected</span>
+          </div>
+          <div id="hiya-field-type" class="hiya-field-type">-</div>
+          <div id="hiya-field-value" class="hiya-field-value">Empty</div>
+        </div>
+      </div>
+
+      <!-- Voice Status Section -->
+      <div class="hiya-voice-section">
+        <div class="hiya-section-title">Voice Control</div>
+        <div class="hiya-voice-status">
+          <div id="hiya-voice-indicator" class="hiya-voice-indicator idle">
+            <span class="hiya-pulse"></span>
+          </div>
+          <span id="hiya-voice-status-text" class="hiya-voice-status-text">Idle</span>
+        </div>
+        <button id="hiya-voice-toggle" class="hiya-btn hiya-btn-primary">
+          Start Listening
+        </button>
+      </div>
+
+      <!-- Navigation Controls -->
+      <div class="hiya-controls-section">
+        <div class="hiya-section-title">Navigation</div>
+        <div class="hiya-controls">
+          <button id="hiya-prev-btn" class="hiya-btn hiya-btn-secondary">
+            ← Previous
+          </button>
+          <button id="hiya-next-btn" class="hiya-btn hiya-btn-secondary">
+            Next →
+          </button>
+        </div>
+        <button id="hiya-jump-unfilled" class="hiya-btn hiya-btn-outline">
+          Jump to Required
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

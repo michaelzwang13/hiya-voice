@@ -1,18 +1,31 @@
 import { FormDetector } from '../utils/form-detector';
+import { VoiceAssistantOverlay } from '../components/overlay';
 import type { Message } from '../types/messages';
 
 console.log('[Hiya] Content script loaded');
 
 const formDetector = new FormDetector();
+let overlay: VoiceAssistantOverlay | null = null;
 
 // Detect forms when the page loads
 window.addEventListener('load', () => {
   const formInfo = formDetector.detectForms();
   console.log('[Hiya] Form detection complete:', formInfo);
 
-  // Show a subtle notification if forms are detected
+  // Initialize overlay
+  overlay = new VoiceAssistantOverlay();
+  overlay.updateFormStatus(formInfo);
+
+  // Wire up overlay events
+  overlay.onNextField = handleNextField;
+  overlay.onPreviousField = handlePreviousField;
+  overlay.onJumpToUnfilled = handleJumpToUnfilled;
+  overlay.onToggleVoice = handleToggleVoice;
+
+  // Show first field if available
   if (formInfo.totalFields > 0) {
-    showNotification(`Detected ${formInfo.totalFields} form fields. Press Alt+V to start voice assistance.`);
+    formDetector.nextField();
+    updateOverlayCurrentField();
   }
 });
 
@@ -168,12 +181,67 @@ function showNotification(message: string, duration = 3000) {
 
 // Listen for keyboard shortcuts
 document.addEventListener('keydown', (event) => {
-  // Alt+V to toggle voice
+  // Alt+V to toggle overlay
   if (event.altKey && event.key.toLowerCase() === 'v') {
     event.preventDefault();
-    showNotification('Voice assistant activated!');
-    chrome.runtime.sendMessage({ type: 'TOGGLE_VOICE' });
+    overlay?.toggle();
   }
 });
+
+/**
+ * Handler functions for overlay events
+ */
+function handleNextField() {
+  const field = formDetector.nextField();
+  updateOverlayCurrentField();
+  if (field) {
+    showNotification(`Now at: ${field.label}`);
+  }
+}
+
+function handlePreviousField() {
+  const field = formDetector.previousField();
+  updateOverlayCurrentField();
+  if (field) {
+    showNotification(`Now at: ${field.label}`);
+  }
+}
+
+function handleJumpToUnfilled() {
+  const field = formDetector.goToFirstUnfilledRequired();
+  updateOverlayCurrentField();
+  if (field) {
+    showNotification(`Jumped to: ${field.label}`);
+  } else {
+    showNotification('All required fields are filled!');
+  }
+}
+
+function handleToggleVoice() {
+  // TODO: Implement voice recognition
+  showNotification('Voice control coming soon!');
+  console.log('[Hiya] Voice toggle clicked');
+}
+
+/**
+ * Updates the overlay with current field information
+ */
+function updateOverlayCurrentField() {
+  if (!overlay) return;
+
+  const currentField = formDetector.getCurrentField();
+  const currentIndex = formDetector.getCurrentFieldIndex();
+  const totalFields = formDetector.getFields().length;
+
+  overlay.updateCurrentField(currentField, currentIndex, totalFields);
+
+  // Also update form status (in case values changed)
+  const formInfo = {
+    fields: formDetector.getFields(),
+    formElement: null,
+    ...formDetector.getFormState(),
+  };
+  overlay.updateFormStatus(formInfo);
+}
 
 export {};
