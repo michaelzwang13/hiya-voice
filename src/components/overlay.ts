@@ -44,7 +44,7 @@ export class VoiceAssistantOverlay {
             <span class="hiya-icon">🎙️</span>
             <span>Hiya Voice Assistant</span>
           </div>
-          <button class="hiya-toggle-btn" id="hiya-toggle" title="Minimize (Alt+V)">
+          <button class="hiya-toggle-btn" id="hiya-toggle" title="Toggle Sidebar (Ctrl+B)">
             <span class="hiya-toggle-icon">−</span>
           </button>
         </div>

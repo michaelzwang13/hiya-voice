@@ -463,11 +463,14 @@ document.addEventListener('keydown', async (event) => {
       // Not on any field yet, go to first field
       console.log('[Hiya] Navigating to first field');
       await handleNextField();
-    } else {
-      // Already on a field, toggle overlay visibility
-      console.log('[Hiya] Toggling overlay');
-      overlay?.toggle();
     }
+  }
+
+  // Control+B (or Command+B on Mac) to toggle sidebar visibility
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey) {
+    event.preventDefault();
+    console.log('[Hiya] Ctrl+B pressed - toggling overlay');
+    overlay?.toggle();
   }
 
   // Control+Shift+R (or Command+Shift+R on Mac) to manually refresh form detection
