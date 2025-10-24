@@ -151,16 +151,24 @@ export class FormDetector {
     if (radioGroup) {
       radioField = radioGroup as HTMLElement;
 
-      // Check for aria-label first
-      const hasAriaLabel = radioField.hasAttribute("aria-label");
-      const ariaLabelValue = radioField.getAttribute("aria-label");
-      console.log('[Hiya Debug] aria-label check:', { hasAriaLabel, ariaLabelValue });
+      // Try Google Forms pattern FIRST
+      console.log('[Hiya Debug] Searching for radio group label');
+      console.log('[Hiya Debug] Radio group element:', radioField);
+      console.log('[Hiya Debug] Radio group className:', radioField.className);
+      console.log('[Hiya Debug] Radio group parent:', radioField.parentElement);
 
-      if (hasAriaLabel) {
+      const googleFormsLabel = this.extractGoogleFormsLabelForGroup(radioGroup || elements[0]);
+      if (googleFormsLabel) {
+        label = googleFormsLabel;
+        console.log('[Hiya Debug] Using Google Forms pattern:', label);
+      }
+      // Fallback to aria-label
+      else if (radioField.hasAttribute("aria-label")) {
+        const ariaLabelValue = radioField.getAttribute("aria-label");
         label = ariaLabelValue || label;
         console.log('[Hiya Debug] Using aria-label:', label);
       }
-      // Then check for aria-labelledby
+      // Fallback to aria-labelledby
       else if (radioField.hasAttribute("aria-labelledby")) {
         const labelId = radioField.getAttribute("aria-labelledby");
         console.log('[Hiya Debug] aria-labelledby:', labelId);
@@ -171,21 +179,8 @@ export class FormDetector {
           console.log('[Hiya Debug] Using aria-labelledby:', label);
         }
       }
-      // Check for preceding heading
-      else {
-        console.log('[Hiya Debug] Searching for radio group label');
-        console.log('[Hiya Debug] Radio group element:', radioField);
-        console.log('[Hiya Debug] Radio group className:', radioField.className);
-        console.log('[Hiya Debug] Radio group parent:', radioField.parentElement);
 
-        // Try Google Forms pattern
-        const googleFormsLabel = this.extractGoogleFormsLabel(group || elements[0]);
-        if (googleFormsLabel) {
-          label = googleFormsLabel;
-          console.log('[Hiya Debug] Using Google Forms pattern:', label);
-        }
-        console.log('[Hiya Debug] Final label:', label);
-      }
+      console.log('[Hiya Debug] Final label:', label);
 
       // Get the radiogroup's id
       id = radioField.id || id;
@@ -196,7 +191,17 @@ export class FormDetector {
       }
     }
     else {
+      // No role="radiogroup" found, use first element
       radioField = elements[0] as HTMLElement;
+
+      // Still try Google Forms pattern even without a radiogroup
+      console.log('[Hiya Debug] No radiogroup found, trying Google Forms pattern from first element');
+      const googleFormsLabel = this.extractGoogleFormsLabelForGroup(elements[0]);
+      if (googleFormsLabel) {
+        label = googleFormsLabel;
+        console.log('[Hiya Debug] Using Google Forms pattern:', label);
+      }
+      console.log('[Hiya Debug] Final label:', label);
     }
 
     // Find the checked element
@@ -264,16 +269,24 @@ export class FormDetector {
       const outerContainer = group.parentElement;
       checkboxField = (outerContainer || group) as HTMLElement;
 
-      // Check for aria-label first on the group
-      const hasAriaLabel = group.hasAttribute('aria-label');
-      const ariaLabelValue = group.getAttribute('aria-label');
-      console.log('[Hiya Debug] aria-label check:', { hasAriaLabel, ariaLabelValue });
+      // Try Google Forms pattern FIRST
+      console.log('[Hiya Debug] Searching for checkbox group label');
+      console.log('[Hiya Debug] Checkbox group element:', group);
+      console.log('[Hiya Debug] Checkbox group className:', group.className);
+      console.log('[Hiya Debug] Checkbox group parent:', group.parentElement);
 
-      if (hasAriaLabel) {
+      const googleFormsLabel = this.extractGoogleFormsLabelForGroup(group || elements[0]);
+      if (googleFormsLabel) {
+        label = googleFormsLabel;
+        console.log('[Hiya Debug] Using Google Forms pattern:', label);
+      }
+      // Fallback to aria-label
+      else if (group.hasAttribute('aria-label')) {
+        const ariaLabelValue = group.getAttribute('aria-label');
         label = ariaLabelValue || label;
         console.log('[Hiya Debug] Using aria-label:', label);
       }
-      // Then check for aria-labelledby on the group
+      // Fallback to aria-labelledby
       else if (group.hasAttribute('aria-labelledby')) {
         const labelId = group.getAttribute('aria-labelledby');
         console.log('[Hiya Debug] aria-labelledby:', labelId);
@@ -284,21 +297,8 @@ export class FormDetector {
           console.log('[Hiya Debug] Using aria-labelledby:', label);
         }
       }
-      // Check for preceding heading or label
-      else {
-        console.log('[Hiya Debug] Searching for checkbox group label');
-        console.log('[Hiya Debug] Checkbox group element:', group);
-        console.log('[Hiya Debug] Checkbox group className:', group.className);
-        console.log('[Hiya Debug] Checkbox group parent:', group.parentElement);
 
-        // Try Google Forms pattern
-        const googleFormsLabel = this.extractGoogleFormsLabel(group || elements[0]);
-        if (googleFormsLabel) {
-          label = googleFormsLabel;
-          console.log('[Hiya Debug] Using Google Forms pattern:', label);
-        }
-        console.log('[Hiya Debug] Final label:', label);
-      }
+      console.log('[Hiya Debug] Final label:', label);
 
       // Get the group's id
       id = group.id || id;
@@ -308,7 +308,17 @@ export class FormDetector {
         required = true;
       }
     } else {
+      // No role="group" found, use first element
       checkboxField = elements[0] as HTMLElement;
+
+      // Still try Google Forms pattern even without a group
+      console.log('[Hiya Debug] No group found for checkbox, trying Google Forms pattern from first element');
+      const googleFormsLabel = this.extractGoogleFormsLabelForGroup(elements[0]);
+      if (googleFormsLabel) {
+        label = googleFormsLabel;
+        console.log('[Hiya Debug] Using Google Forms pattern:', label);
+      }
+      console.log('[Hiya Debug] Final label:', label);
     }
 
     // Find all checked checkboxes
@@ -340,30 +350,98 @@ export class FormDetector {
   }
 
   /**
-   * Finds label by searching up for Google Forms container (jsmodel attribute)
+   * Finds label for text boxes by searching up for Google Forms container (jsmodel attribute)
    * then searching down for role="heading"
    */
-  private extractGoogleFormsLabel(element: Element): string | null {
-    console.log('[Hiya Debug] Trying Google Forms pattern...');
-
+  private extractGoogleFormsLabelForTextBox(element: Element): string | null {
     // Search up the tree for div with jsmodel attribute
     let current: Element | null = element;
     while (current && current !== document.body) {
       if (current.tagName === 'DIV' && current.hasAttribute('jsmodel')) {
-        console.log('[Hiya Debug] Found jsmodel div:', current);
-
         // Search down for role="heading"
         const headingElement = current.querySelector('[role="heading"]');
         if (headingElement?.textContent) {
           const label = headingElement.textContent.trim();
-          console.log('[Hiya Debug] Found Google Forms heading:', label);
           return label;
         }
       }
       current = current.parentElement;
     }
+    return null;
+  }
 
-    console.log('[Hiya Debug] Google Forms pattern not found');
+  /**
+   * Finds label for radio/checkbox groups in Google Forms
+   * Start from radiogroup/group, go up to first jsmodel, down to jscontroller, then first div with role=heading
+   */
+  private extractGoogleFormsLabelForGroup(element: Element): string | null {
+    console.log('[Hiya Debug - Radio/Checkbox] ========== Starting Traversal ==========');
+    console.log('[Hiya Debug - Radio/Checkbox] Starting element:', element);
+    console.log('[Hiya Debug - Radio/Checkbox] Starting element role:', element.getAttribute('role'));
+    console.log('[Hiya Debug - Radio/Checkbox] Starting element className:', element.className);
+
+    // Search up the tree for div with jsmodel attribute
+    let current: Element | null = element;
+    let stepCount = 0;
+
+    console.log('[Hiya Debug - Radio/Checkbox] ----- Going UP the tree -----');
+    while (current && current !== document.body) {
+      const isDiv = current.tagName === 'DIV';
+      const hasJsmodel = current.hasAttribute('jsmodel');
+      const jsmodelValue = current.getAttribute('jsmodel');
+
+      console.log(`[Hiya Debug - Radio/Checkbox] Step ${stepCount}:`, {
+        tagName: current.tagName,
+        isDiv: isDiv,
+        hasJsmodel: hasJsmodel,
+        jsmodelValue: jsmodelValue,
+        className: current.className.substring(0, 50)
+      });
+
+      if (isDiv && hasJsmodel) {
+        console.log('[Hiya Debug - Radio/Checkbox] ✓ Found jsmodel div at step', stepCount);
+        console.log('[Hiya Debug - Radio/Checkbox] ----- Going DOWN from jsmodel -----');
+
+        // Go down to element with jscontroller
+        const jscontrollerElement = current.querySelector('[jscontroller]');
+        console.log('[Hiya Debug - Radio/Checkbox] jscontroller element:', jscontrollerElement);
+        console.log('[Hiya Debug - Radio/Checkbox] jscontroller value:', jscontrollerElement?.getAttribute('jscontroller'));
+
+        if (jscontrollerElement) {
+          // Find first div child of jscontroller
+          const firstDiv = jscontrollerElement.querySelector('div');
+          console.log('[Hiya Debug - Radio/Checkbox] First div child of jscontroller:', firstDiv);
+          console.log('[Hiya Debug - Radio/Checkbox] First div className:', firstDiv?.className);
+
+          if (firstDiv) {
+            // Search for role="heading" within this div
+            const headingElement = firstDiv.querySelector('[role="heading"]');
+            console.log('[Hiya Debug - Radio/Checkbox] Heading element in first div:', headingElement);
+
+            if (headingElement?.textContent) {
+              const label = headingElement.textContent.trim();
+              console.log('[Hiya Debug - Radio/Checkbox] ✓✓✓ SUCCESS! Found label:', label);
+              return label;
+            } else {
+              console.log('[Hiya Debug - Radio/Checkbox] ✗ No heading text found');
+            }
+          } else {
+            console.log('[Hiya Debug - Radio/Checkbox] ✗ No first div found under jscontroller');
+          }
+        } else {
+          console.log('[Hiya Debug - Radio/Checkbox] ✗ No jscontroller found under jsmodel');
+        }
+
+        // If we found jsmodel but couldn't find the label, stop searching
+        console.log('[Hiya Debug - Radio/Checkbox] Stopping search at first jsmodel');
+        break;
+      }
+
+      current = current.parentElement;
+      stepCount++;
+    }
+
+    console.log('[Hiya Debug - Radio/Checkbox] ✗✗✗ FAILED: Label not found after', stepCount, 'steps');
     return null;
   }
 
@@ -371,20 +449,10 @@ export class FormDetector {
    * Extracts the label for a form field
    */
   private extractLabel(element: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): string {
-    console.log('[Hiya Debug] Extracting label for element:', element);
-    console.log('[Hiya Debug] Element details:', {
-      tagName: element.tagName,
-      type: (element as HTMLInputElement).type,
-      id: element.id,
-      name: element.name,
-      className: element.className,
-      placeholder: element.getAttribute('placeholder')
-    });
-
     // Try multiple methods to find the label
 
     // 0. Google Forms pattern (jsmodel div -> role="heading")
-    const googleFormsLabel = this.extractGoogleFormsLabel(element);
+    const googleFormsLabel = this.extractGoogleFormsLabelForTextBox(element);
     if (googleFormsLabel) {
       return this.cleanLabel(googleFormsLabel);
     }
@@ -392,17 +460,14 @@ export class FormDetector {
     // 1. Associated <label> element
     if (element.id) {
       const label = document.querySelector(`label[for="${element.id}"]`);
-      console.log('[Hiya Debug] 1. Label[for] search for id', element.id, ':', label);
       if (label?.textContent) {
         const cleanedLabel = this.cleanLabel(label.textContent);
-        console.log('[Hiya Debug] Using label[for]:', cleanedLabel);
         return cleanedLabel;
       }
     }
 
     // 2. Parent <label> element
     const parentLabel = element.closest('label');
-    console.log('[Hiya Debug] 2. Parent label:', parentLabel);
     if (parentLabel) {
       // Clone and remove the input to get just the label text
       const clone = parentLabel.cloneNode(true) as HTMLElement;
@@ -410,54 +475,43 @@ export class FormDetector {
       inputs.forEach(input => input.remove());
       if (clone.textContent?.trim()) {
         const cleanedLabel = this.cleanLabel(clone.textContent);
-        console.log('[Hiya Debug] Using parent label:', cleanedLabel);
         return cleanedLabel;
       }
     }
 
     // 3. aria-label attribute
     const ariaLabel = element.getAttribute('aria-label');
-    console.log('[Hiya Debug] 3. aria-label:', ariaLabel);
     if (ariaLabel) {
       const cleanedLabel = this.cleanLabel(ariaLabel);
-      console.log('[Hiya Debug] Using aria-label:', cleanedLabel);
       return cleanedLabel;
     }
 
     // 4. aria-labelledby attribute
     const ariaLabelledBy = element.getAttribute('aria-labelledby');
-    console.log('[Hiya Debug] 4. aria-labelledby:', ariaLabelledBy);
     if (ariaLabelledBy) {
       const labelElement = document.getElementById(ariaLabelledBy);
-      console.log('[Hiya Debug] aria-labelledby element:', labelElement);
       if (labelElement?.textContent) {
         const cleanedLabel = this.cleanLabel(labelElement.textContent);
-        console.log('[Hiya Debug] Using aria-labelledby:', cleanedLabel);
         return cleanedLabel;
       }
     }
 
     // 5. aria-describedby attribute
     const ariaDescribedBy = element.getAttribute('aria-describedby');
-    console.log('[Hiya Debug] 5. aria-describedby:', ariaDescribedBy);
     if (ariaDescribedBy) {
       const descElement = document.getElementById(ariaDescribedBy);
       if (descElement?.textContent) {
         const cleanedLabel = this.cleanLabel(descElement.textContent);
-        console.log('[Hiya Debug] Using aria-describedby:', cleanedLabel);
         return cleanedLabel;
       }
     }
 
     // 6. Previous sibling text (common in div-based forms)
     const previousSibling = element.previousElementSibling;
-    console.log('[Hiya Debug] 6. Previous sibling:', previousSibling);
     if (previousSibling && (previousSibling.tagName === 'LABEL' || previousSibling.tagName === 'SPAN' || previousSibling.tagName === 'DIV')) {
       const text = previousSibling.textContent?.trim();
-      console.log('[Hiya Debug] Previous sibling text:', text?.substring(0, 50));
       if (text && text.length > 0 && text.length < 100) {
         const cleanedLabel = this.cleanLabel(text);
-        console.log('[Hiya Debug] Using previous sibling:', cleanedLabel);
         return cleanedLabel;
       }
     }
@@ -465,12 +519,9 @@ export class FormDetector {
     // 7. Preceding heading (h1-h6)
     let current = element.previousElementSibling;
     let attempts = 0;
-    console.log('[Hiya Debug] 7. Searching for preceding heading...');
     while (current && attempts < 3) {
-      console.log(`[Hiya Debug] Sibling #${attempts}:`, current.tagName);
       if (/^H[1-6]$/.test(current.tagName)) {
         const cleanedLabel = this.cleanLabel(current.textContent || '');
-        console.log('[Hiya Debug] Using heading:', cleanedLabel);
         return cleanedLabel;
       }
       current = current.previousElementSibling;
@@ -479,45 +530,35 @@ export class FormDetector {
 
     // 8. Parent element's data attributes
     const parent = element.parentElement;
-    console.log('[Hiya Debug] 8. Parent element:', parent);
     if (parent) {
       const dataLabel = parent.getAttribute('data-label') || parent.getAttribute('data-field-label');
-      console.log('[Hiya Debug] Parent data-label:', dataLabel);
       if (dataLabel) {
         const cleanedLabel = this.cleanLabel(dataLabel);
-        console.log('[Hiya Debug] Using data-label:', cleanedLabel);
         return cleanedLabel;
       }
     }
 
     // 9. Placeholder as fallback
     const placeholder = element.getAttribute('placeholder');
-    console.log('[Hiya Debug] 9. Placeholder:', placeholder);
     if (placeholder) {
       const cleanedLabel = this.cleanLabel(placeholder);
-      console.log('[Hiya Debug] Using placeholder:', cleanedLabel);
       return cleanedLabel;
     }
 
     // 10. Title attribute
     const title = element.getAttribute('title');
-    console.log('[Hiya Debug] 10. Title:', title);
     if (title) {
       const cleanedLabel = this.cleanLabel(title);
-      console.log('[Hiya Debug] Using title:', cleanedLabel);
       return cleanedLabel;
     }
 
     // 11. Name attribute as last resort
     const name = element.getAttribute('name');
-    console.log('[Hiya Debug] 11. Name:', name);
     if (name) {
       const cleanedLabel = this.cleanLabel(name.replace(/[_-]/g, ' '));
-      console.log('[Hiya Debug] Using name:', cleanedLabel);
       return cleanedLabel;
     }
 
-    console.log('[Hiya Debug] No label found, using default');
     return 'Unlabeled field';
   }
 
