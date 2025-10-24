@@ -6,15 +6,42 @@ console.log('[Hiya] Content script loaded');
 
 const formDetector = new FormDetector();
 let overlay: VoiceAssistantOverlay | null = null;
+let isExtensionEnabled = true;
+
+// Check if extension is enabled
+chrome.storage.local.get(['extensionEnabled'], (result) => {
+  isExtensionEnabled = result.extensionEnabled !== false; // Default to true
+
+  if (isExtensionEnabled) {
+    initializeExtension();
+  }
+});
 
 // Detect forms when the page loads
 window.addEventListener('load', () => {
+  if (!isExtensionEnabled) return;
+
   const formInfo = formDetector.detectForms();
   console.log('[Hiya] Form detection complete:', formInfo);
 
-  // Initialize overlay
+  if (overlay) {
+    overlay.updateFormStatus(formInfo);
+
+    // Show first field if available
+    if (formInfo.totalFields > 0) {
+      formDetector.nextField();
+      updateOverlayCurrentField();
+    }
+  }
+});
+
+/**
+ * Initializes the extension overlay and events
+ */
+function initializeExtension() {
+  if (overlay) return; // Already initialized
+
   overlay = new VoiceAssistantOverlay();
-  overlay.updateFormStatus(formInfo);
 
   // Wire up overlay events
   overlay.onNextField = handleNextField;
@@ -22,12 +49,17 @@ window.addEventListener('load', () => {
   overlay.onJumpToUnfilled = handleJumpToUnfilled;
   overlay.onToggleVoice = handleToggleVoice;
 
-  // Show first field if available
-  if (formInfo.totalFields > 0) {
-    formDetector.nextField();
-    updateOverlayCurrentField();
+  // Detect forms if page already loaded
+  if (document.readyState === 'complete') {
+    const formInfo = formDetector.detectForms();
+    overlay.updateFormStatus(formInfo);
+
+    if (formInfo.totalFields > 0) {
+      formDetector.nextField();
+      updateOverlayCurrentField();
+    }
   }
-});
+}
 
 // Listen for messages from popup or background script
 chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) => {
@@ -96,6 +128,21 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
         showNotification('All required fields are filled!');
         sendResponse({ success: false, message: 'All required fields filled' });
       }
+      break;
+    }
+
+    case 'ENABLE_EXTENSION': {
+      isExtensionEnabled = true;
+      initializeExtension();
+      sendResponse({ success: true });
+      break;
+    }
+
+    case 'DISABLE_EXTENSION': {
+      isExtensionEnabled = false;
+      overlay?.destroy();
+      overlay = null;
+      sendResponse({ success: true });
       break;
     }
 

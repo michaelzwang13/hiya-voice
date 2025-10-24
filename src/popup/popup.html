@@ -9,64 +9,41 @@
 <body>
   <div class="container">
     <header>
-      <h1>Hiya Voice Assistant</h1>
-      <p class="subtitle">Voice-powered form filling</p>
+      <div class="header-content">
+        <div class="icon">🎙️</div>
+        <div class="title-section">
+          <h1>Hiya Voice</h1>
+          <p class="subtitle">Form filling assistant</p>
+        </div>
+      </div>
     </header>
 
     <main>
-      <section class="status-section">
-        <div class="status-item">
-          <span class="label">Total fields:</span>
-          <span class="value" id="fields-count">-</span>
+      <div class="toggle-section">
+        <div class="toggle-info">
+          <span class="toggle-label">Extension</span>
+          <span class="toggle-status" id="status-text">Enabled</span>
         </div>
-        <div class="status-item">
-          <span class="label">Filled fields:</span>
-          <span class="value" id="filled-count">-</span>
-        </div>
-        <div class="status-item">
-          <span class="label">Required:</span>
-          <span class="value" id="required-count">-</span>
-        </div>
-        <div class="status-item progress-item">
-          <span class="label">Progress:</span>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
-            <span class="progress-text" id="progress-text">0%</span>
-          </div>
-        </div>
-      </section>
+        <label class="toggle-switch">
+          <input type="checkbox" id="extension-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
 
-      <section class="current-field-section" id="current-field-section" style="display: none;">
-        <h3>Current Field</h3>
-        <div class="field-info">
-          <div class="field-label" id="current-field-label">-</div>
-          <div class="field-type" id="current-field-type">-</div>
-        </div>
-      </section>
+      <div class="info-section">
+        <p class="info-text">
+          Press <kbd>Alt+V</kbd> to toggle the sidebar on any webpage with forms.
+        </p>
+      </div>
 
-      <section class="navigation-section">
-        <h3>Navigation</h3>
-        <div class="nav-buttons">
-          <button id="prev-field" class="btn btn-nav">← Previous</button>
-          <button id="next-field" class="btn btn-nav">Next →</button>
-        </div>
-        <button id="goto-unfilled" class="btn btn-outline">
-          Go to First Unfilled
-        </button>
-      </section>
-
-      <section class="actions-section">
-        <button id="detect-forms" class="btn btn-primary">
-          Refresh Forms
-        </button>
-        <button id="toggle-voice" class="btn btn-secondary">
-          Start Voice (Alt+V)
-        </button>
-      </section>
+      <div class="links-section">
+        <a href="#" id="open-options" class="link">Settings</a>
+        <a href="https://github.com/yourusername/hiya-voice" target="_blank" class="link">Help</a>
+      </div>
     </main>
 
     <footer>
-      <p class="version">v0.2.0 - Day 2</p>
+      <p class="version">v0.1.0</p>
     </footer>
   </div>
 
