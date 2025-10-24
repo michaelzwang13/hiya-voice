@@ -335,11 +335,11 @@ function showNotification(message: string, duration = 3000) {
 
 // Listen for keyboard shortcuts
 document.addEventListener('keydown', async (event) => {
+  if (!isExtensionEnabled) return;
+
   // Control+V (or Command+V on Mac) to start voice filling (jump to first field)
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
     event.preventDefault();
-
-    if (!isExtensionEnabled) return;
 
     // Get current field to check if we're already on a field
     const currentField = formDetector.getCurrentField();
@@ -355,6 +355,24 @@ document.addEventListener('keydown', async (event) => {
       // Already on a field, toggle overlay visibility
       console.log('[Hiya] Toggling overlay');
       overlay?.toggle();
+    }
+  }
+
+  // Arrow keys for navigation (only when we have a current field)
+  const currentIndex = formDetector.getCurrentFieldIndex();
+  if (currentIndex !== -1) {
+    // Right arrow: Next field
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      console.log('[Hiya] Arrow Right pressed - navigating to next field');
+      await handleNextField();
+    }
+
+    // Left arrow: Previous field
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      console.log('[Hiya] Arrow Left pressed - navigating to previous field');
+      await handlePreviousField();
     }
   }
 });
