@@ -178,52 +178,11 @@ export class FormDetector {
         console.log('[Hiya Debug] Radio group className:', radioField.className);
         console.log('[Hiya Debug] Radio group parent:', radioField.parentElement);
 
-        // Try Google Forms pattern first
-        const googleFormsLabel = this.extractGoogleFormsLabel(radioField);
+        // Try Google Forms pattern
+        const googleFormsLabel = this.extractGoogleFormsLabel(group || elements[0]);
         if (googleFormsLabel) {
           label = googleFormsLabel;
           console.log('[Hiya Debug] Using Google Forms pattern:', label);
-        } else {
-          let prev = radioField.previousElementSibling;
-        let attempts = 0;
-        while (prev && attempts < 5) {
-          console.log(`[Hiya Debug] Checking sibling #${attempts}:`, {
-            tagName: prev.tagName,
-            className: prev.className,
-            id: prev.id,
-            role: prev.getAttribute('role'),
-            textContent: prev.textContent?.substring(0, 50)
-          });
-
-          if (/^H[1-6]$/.test(prev.tagName)) {
-            label = prev.textContent?.trim() || label;
-            console.log('[Hiya Debug] Found heading tag:', label);
-            break;
-          }
-          if (prev.tagName === 'LABEL' || prev.tagName === 'LEGEND') {
-            label = prev.textContent?.trim() || label;
-            console.log('[Hiya Debug] Found label/legend:', label);
-            break;
-          }
-          // Check for elements with role="heading" (Google Forms pattern)
-          const headingElement = prev.querySelector('[role="heading"]');
-          if (headingElement) {
-            label = headingElement.textContent?.trim() || label;
-            console.log('[Hiya Debug] Found role=heading:', label);
-            break;
-          }
-          if (prev.tagName === 'DIV' || prev.tagName === 'SPAN') {
-            const text = prev.textContent?.trim();
-            // Only use if it's short enough to be a label
-            if (text && text.length > 0 && text.length < 100) {
-              label = text;
-              console.log('[Hiya Debug] Found div/span text:', label);
-              break;
-            }
-          }
-          prev = prev.previousElementSibling;
-          attempts++;
-        }
         }
         console.log('[Hiya Debug] Final label:', label);
       }
@@ -332,45 +291,11 @@ export class FormDetector {
         console.log('[Hiya Debug] Checkbox group className:', group.className);
         console.log('[Hiya Debug] Checkbox group parent:', group.parentElement);
 
-        let prev = group.previousElementSibling;
-        let attempts = 0;
-        while (prev && attempts < 5) {
-          console.log(`[Hiya Debug] Checking sibling #${attempts}:`, {
-            tagName: prev.tagName,
-            className: prev.className,
-            id: prev.id,
-            role: prev.getAttribute('role'),
-            textContent: prev.textContent?.substring(0, 50)
-          });
-
-          if (/^H[1-6]$/.test(prev.tagName)) {
-            label = prev.textContent?.trim() || label;
-            console.log('[Hiya Debug] Found heading tag:', label);
-            break;
-          }
-          if (prev.tagName === 'LABEL' || prev.tagName === 'LEGEND') {
-            label = prev.textContent?.trim() || label;
-            console.log('[Hiya Debug] Found label/legend:', label);
-            break;
-          }
-          // Check for elements with role="heading" (Google Forms pattern)
-          const headingElement = prev.querySelector('[role="heading"]');
-          if (headingElement) {
-            label = headingElement.textContent?.trim() || label;
-            console.log('[Hiya Debug] Found role=heading:', label);
-            break;
-          }
-          if (prev.tagName === 'DIV' || prev.tagName === 'SPAN') {
-            const text = prev.textContent?.trim();
-            // Only use if it's short enough to be a label
-            if (text && text.length > 0 && text.length < 100) {
-              label = text;
-              console.log('[Hiya Debug] Found div/span text:', label);
-              break;
-            }
-          }
-          prev = prev.previousElementSibling;
-          attempts++;
+        // Try Google Forms pattern
+        const googleFormsLabel = this.extractGoogleFormsLabel(group || elements[0]);
+        if (googleFormsLabel) {
+          label = googleFormsLabel;
+          console.log('[Hiya Debug] Using Google Forms pattern:', label);
         }
         console.log('[Hiya Debug] Final label:', label);
       }
