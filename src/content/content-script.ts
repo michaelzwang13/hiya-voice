@@ -327,14 +327,21 @@ document.addEventListener('keydown', async (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
     event.preventDefault();
 
+    if (!isExtensionEnabled) return;
+
     // Get current field to check if we're already on a field
     const currentField = formDetector.getCurrentField();
+    const currentIndex = formDetector.getCurrentFieldIndex();
 
-    if (!currentField) {
+    console.log('[Hiya] Ctrl+V pressed. Current field:', currentField, 'Index:', currentIndex);
+
+    if (currentIndex === -1 || !currentField) {
       // Not on any field yet, go to first field
+      console.log('[Hiya] Navigating to first field');
       await handleNextField();
     } else {
       // Already on a field, toggle overlay visibility
+      console.log('[Hiya] Toggling overlay');
       overlay?.toggle();
     }
   }
@@ -344,14 +351,18 @@ document.addEventListener('keydown', async (event) => {
  * Handler functions for overlay events
  */
 async function handleNextField() {
+  console.log('[Hiya] handleNextField called');
   const field = formDetector.nextField();
+  console.log('[Hiya] Next field:', field);
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Now at: ${field.label}`);
+    console.log('[Hiya] Speaking field label:', field.label);
     await speak(field.label);
 
     // Only trigger voice input for text fields (not radio, checkbox, etc.)
     if (field.type === 'text' || field.type === 'email' || field.type === 'phone' || field.type === 'textarea') {
+      console.log('[Hiya] Text field detected, starting voice input. Type:', field.type);
       // Wait a bit to ensure TTS is completely done and audio buffer is clear
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -361,7 +372,9 @@ async function handleNextField() {
       await new Promise(resolve => setTimeout(resolve, 300));
 
       try {
+        console.log('[Hiya] Starting speech recognition');
         const transcript = await startSpeechRecognition();
+        console.log('[Hiya] Transcript received:', transcript);
         if (transcript) {
           formDetector.fillCurrentField(transcript);
           showNotification(`Filled: ${transcript}`);
@@ -371,7 +384,11 @@ async function handleNextField() {
         console.error('[Hiya] Speech recognition error:', error);
         showNotification('Speech recognition failed');
       }
+    } else {
+      console.log('[Hiya] Not a text field, skipping voice input. Type:', field.type);
     }
+  } else {
+    console.log('[Hiya] No field returned from nextField()');
   }
 }
 
