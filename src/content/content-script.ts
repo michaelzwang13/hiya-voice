@@ -21,6 +21,31 @@ chrome.storage.local.get(['extensionEnabled'], (result) => {
 // Detect forms when the page loads
 window.addEventListener('load', async () => {
   if (!isExtensionEnabled) return;
+  await refreshFormDetection();
+});
+
+// Detect URL changes (for single-page apps like multi-page forms)
+let lastUrl = location.href;
+new MutationObserver(async () => {
+  const currentUrl = location.href;
+  if (currentUrl !== lastUrl) {
+    lastUrl = currentUrl;
+    console.log('[Hiya] URL changed, refreshing form detection');
+    await refreshFormDetection();
+  }
+}).observe(document, { subtree: true, childList: true });
+
+// Also listen for popstate events (back/forward navigation)
+window.addEventListener('popstate', async () => {
+  console.log('[Hiya] Navigation detected (popstate), refreshing form detection');
+  await refreshFormDetection();
+});
+
+/**
+ * Refreshes form detection and updates the overlay
+ */
+async function refreshFormDetection() {
+  if (!isExtensionEnabled) return;
 
   const formInfo = formDetector.detectForms();
   console.log('[Hiya] Form detection complete:', formInfo);
@@ -33,7 +58,7 @@ window.addEventListener('load', async () => {
       await speak('Welcome to Hi ya Voice. Press Control V to start filling the form.');
     }
   }
-});
+}
 
 /**
  * Initializes the extension overlay and events
@@ -47,17 +72,10 @@ function initializeExtension() {
   overlay.onNextField = handleNextField;
   overlay.onPreviousField = handlePreviousField;
   overlay.onJumpToUnfilled = handleJumpToUnfilled;
-  overlay.onToggleVoice = handleToggleVoice;
 
   // Detect forms if page already loaded
   if (document.readyState === 'complete') {
-    const formInfo = formDetector.detectForms();
-    overlay.updateFormStatus(formInfo);
-
-    // Don't auto-navigate to first field, just show welcome message
-    if (formInfo.totalFields > 0) {
-      speak('Welcome to Hi ya Voice. Press Control V to start filling the form.');
-    }
+    refreshFormDetection();
   }
 }
 
@@ -432,7 +450,7 @@ document.addEventListener('keydown', async (event) => {
   if (!isExtensionEnabled) return;
 
   // Control+V (or Command+V on Mac) to start voice filling (jump to first field)
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v' && !event.shiftKey) {
     event.preventDefault();
 
     // Get current field to check if we're already on a field
@@ -450,6 +468,15 @@ document.addEventListener('keydown', async (event) => {
       console.log('[Hiya] Toggling overlay');
       overlay?.toggle();
     }
+  }
+
+  // Control+Shift+R (or Command+Shift+R on Mac) to manually refresh form detection
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'r') {
+    event.preventDefault();
+    console.log('[Hiya] Manual refresh triggered');
+    showNotification('Refreshing form detection...');
+    await refreshFormDetection();
+    showNotification('Form detection refreshed!');
   }
 
   // Arrow keys for navigation (only when we have a current field)
@@ -510,12 +537,6 @@ async function handleJumpToUnfilled() {
     showNotification('All required fields are filled!');
     await speak('All required fields are filled!');
   }
-}
-
-function handleToggleVoice() {
-  // TODO: Implement voice recognition
-  showNotification('Voice control coming soon!');
-  console.log('[Hiya] Voice toggle clicked');
 }
 
 /**

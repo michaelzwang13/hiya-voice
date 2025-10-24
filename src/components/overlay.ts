@@ -11,7 +11,6 @@ export class VoiceAssistantOverlay {
   public onNextField?: () => void;
   public onPreviousField?: () => void;
   public onJumpToUnfilled?: () => void;
-  public onToggleVoice?: () => void;
 
   constructor() {
     this.injectOverlay();
@@ -81,19 +80,6 @@ export class VoiceAssistantOverlay {
             </div>
           </div>
 
-          <div class="hiya-voice-section">
-            <div class="hiya-section-title">Voice Control</div>
-            <div class="hiya-voice-status">
-              <div id="hiya-voice-indicator" class="hiya-voice-indicator idle">
-                <span class="hiya-pulse"></span>
-              </div>
-              <span id="hiya-voice-status-text" class="hiya-voice-status-text">Idle</span>
-            </div>
-            <button id="hiya-voice-toggle" class="hiya-btn hiya-btn-primary">
-              Start Listening
-            </button>
-          </div>
-
           <div class="hiya-controls-section">
             <div class="hiya-section-title">Navigation</div>
             <div class="hiya-controls">
@@ -156,10 +142,6 @@ export class VoiceAssistantOverlay {
 
     const jumpBtn = document.getElementById('hiya-jump-unfilled');
     jumpBtn?.addEventListener('click', () => this.onJumpToUnfilled?.());
-
-    // Voice toggle
-    const voiceBtn = document.getElementById('hiya-voice-toggle');
-    voiceBtn?.addEventListener('click', () => this.onToggleVoice?.());
   }
 
   /**
@@ -252,27 +234,6 @@ export class VoiceAssistantOverlay {
 
     if (fieldValueEl) {
       fieldValueEl.textContent = field.value || 'Empty';
-    }
-  }
-
-  /**
-   * Sets the voice status
-   */
-  public setVoiceStatus(isListening: boolean): void {
-    const indicator = document.getElementById('hiya-voice-indicator');
-    const statusText = document.getElementById('hiya-voice-status-text');
-    const voiceBtn = document.getElementById('hiya-voice-toggle');
-
-    if (indicator) {
-      indicator.className = `hiya-voice-indicator ${isListening ? 'listening' : 'idle'}`;
-    }
-
-    if (statusText) {
-      statusText.textContent = isListening ? 'Listening...' : 'Idle';
-    }
-
-    if (voiceBtn) {
-      voiceBtn.textContent = isListening ? 'Stop Listening' : 'Start Listening';
     }
   }
 
