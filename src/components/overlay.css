@@ -16,7 +16,7 @@
 }
 
 .hiya-overlay.minimized {
-  transform: translateX(calc(100% - 50px));
+  transform: translateX(100%);
 }
 
 /* Minimized Tab */
