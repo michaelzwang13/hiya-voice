@@ -82,6 +82,7 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
       const field = formDetector.nextField();
       if (field) {
         showNotification(`Now at: ${field.label}`);
+        speak(field.label);
         sendResponse({ success: true, field });
       } else {
         sendResponse({ success: false, error: 'No fields found' });
@@ -93,6 +94,7 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
       const field = formDetector.previousField();
       if (field) {
         showNotification(`Now at: ${field.label}`);
+        speak(field.label);
         sendResponse({ success: true, field });
       } else {
         sendResponse({ success: false, error: 'No fields found' });
@@ -123,9 +125,11 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
       const field = formDetector.goToFirstUnfilledRequired();
       if (field) {
         showNotification(`Jumped to: ${field.label}`);
+        speak(field.label);
         sendResponse({ success: true, field });
       } else {
         showNotification('All required fields are filled!');
+        speak('All required fields are filled!');
         sendResponse({ success: false, message: 'All required fields filled' });
       }
       break;
@@ -152,6 +156,21 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
 
   return true; // Keep the message channel open for async responses
 });
+
+/**
+ * Speaks text using the Web Speech API
+ */
+function speak(text: string) {
+  // Cancel any ongoing speech
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.0; // Normal speed
+  utterance.pitch = 1.0; // Normal pitch
+  utterance.volume = 1.0; // Full volume
+
+  window.speechSynthesis.speak(utterance);
+}
 
 /**
  * Shows a temporary notification overlay on the page
@@ -243,6 +262,7 @@ function handleNextField() {
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Now at: ${field.label}`);
+    speak(field.label);
   }
 }
 
@@ -251,6 +271,7 @@ function handlePreviousField() {
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Now at: ${field.label}`);
+    speak(field.label);
   }
 }
 
@@ -259,8 +280,10 @@ function handleJumpToUnfilled() {
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Jumped to: ${field.label}`);
+    speak(field.label);
   } else {
     showNotification('All required fields are filled!');
+    speak('All required fields are filled!');
   }
 }
 
