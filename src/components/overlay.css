@@ -16,7 +16,68 @@
 }
 
 .hiya-overlay.minimized {
-  transform: translateX(100%);
+  transform: translateX(calc(100% - 50px));
+}
+
+/* Minimized Tab */
+.hiya-minimized-tab {
+  position: absolute;
+  left: -50px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 120px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 0 0 8px;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.hiya-overlay.minimized .hiya-minimized-tab {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hiya-minimized-tab:hover {
+  background: linear-gradient(135deg, #7c8ff0 0%, #8557ae 100%);
+  box-shadow: -6px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.hiya-tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hiya-tab-icon {
+  font-size: 24px;
+  animation: tab-pulse 2s infinite;
+}
+
+.hiya-tab-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@keyframes tab-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 /* Resize Handle */

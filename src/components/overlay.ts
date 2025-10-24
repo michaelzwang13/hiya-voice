@@ -32,6 +32,14 @@ export class VoiceAssistantOverlay {
       <div id="hiya-overlay" class="hiya-overlay">
         <div class="hiya-resize-handle"></div>
 
+        <!-- Minimized Tab (visible when overlay is minimized) -->
+        <div class="hiya-minimized-tab" id="hiya-minimized-tab">
+          <div class="hiya-tab-content">
+            <span class="hiya-tab-icon">🎙️</span>
+            <span class="hiya-tab-text">Hiya</span>
+          </div>
+        </div>
+
         <div class="hiya-header">
           <div class="hiya-title">
             <span class="hiya-icon">🎙️</span>
@@ -134,6 +142,10 @@ export class VoiceAssistantOverlay {
     // Toggle minimize
     const toggleBtn = document.getElementById('hiya-toggle');
     toggleBtn?.addEventListener('click', () => this.toggle());
+
+    // Click minimized tab to expand
+    const minimizedTab = document.getElementById('hiya-minimized-tab');
+    minimizedTab?.addEventListener('click', () => this.show());
 
     // Navigation buttons
     const nextBtn = document.getElementById('hiya-next-btn');
