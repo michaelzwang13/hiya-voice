@@ -736,15 +736,19 @@ export class FormDetector {
 
     // Handle ARIA elements differently
     if (field.isAria) {
-      // For ARIA radios, set aria-checked
+      // For ARIA radios, set aria-checked and add visual class
       if (field.type === 'radio' && field.ariaElements) {
         // Find the radio option that matches the value
         field.ariaElements.forEach(el => {
           const optionLabel = el.getAttribute('aria-label') || el.textContent?.trim() || '';
           if (optionLabel === value) {
             el.setAttribute('aria-checked', 'true');
+            // Add visual indicator class for Google Forms
+            el.classList.add('N2RpBe');
           } else {
             el.setAttribute('aria-checked', 'false');
+            // Remove visual indicator class
+            el.classList.remove('N2RpBe');
           }
         });
       }
@@ -756,8 +760,12 @@ export class FormDetector {
           const checkedItems = value.split(',').map(v => v.trim());
           if (checkedItems.includes(optionLabel)) {
             el.setAttribute('aria-checked', 'true');
+            // Add visual indicator class for Google Forms
+            el.classList.add('N2RpBe');
           } else {
             el.setAttribute('aria-checked', 'false');
+            // Remove visual indicator class
+            el.classList.remove('N2RpBe');
           }
         });
       }
