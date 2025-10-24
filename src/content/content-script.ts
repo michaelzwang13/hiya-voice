@@ -170,6 +170,100 @@ function shouldUseVoiceInput(fieldType: string): boolean {
 }
 
 /**
+ * Handle voice input for a specific field
+ */
+async function handleVoiceInputForField(field: any) {
+  // Handle radio and checkbox groups with option selection
+  if (field.type === 'radio' || field.type === 'checkbox') {
+    console.log('[Hiya] Radio/Checkbox field detected, reading options');
+
+    // Read out all options
+    if (field.options && field.options.length > 0) {
+      for (let i = 0; i < field.options.length; i++) {
+        await speak(`Option ${i + 1}: ${field.options[i]}`);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      // Wait before starting recognition
+      await new Promise(resolve => setTimeout(resolve, 500));
+      playBeep();
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      try {
+        await speak('Say the option number');
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const transcript = await startSpeechRecognition();
+        console.log('[Hiya] Transcript received:', transcript);
+
+        if (transcript) {
+          // Parse number from transcript (handle "one", "1", "option 1", etc.)
+          const numberMatch = transcript.match(/\d+/);
+          const wordToNumber: {[key: string]: number} = {
+            'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+            'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+          };
+
+          let selectedIndex = -1;
+          if (numberMatch) {
+            selectedIndex = parseInt(numberMatch[0]) - 1;
+          } else {
+            // Try to match word numbers
+            const lowerTranscript = transcript.toLowerCase();
+            for (const [word, num] of Object.entries(wordToNumber)) {
+              if (lowerTranscript.includes(word)) {
+                selectedIndex = num - 1;
+                break;
+              }
+            }
+          }
+
+          if (selectedIndex >= 0 && selectedIndex < field.options.length) {
+            const selectedOption = field.options[selectedIndex];
+            formDetector.fillCurrentField(selectedOption);
+            showNotification(`Selected: ${selectedOption}`);
+            await speak(`Selected ${selectedOption}`);
+          } else {
+            showNotification('Invalid option number');
+            await speak('Invalid option number');
+          }
+        }
+      } catch (error) {
+        console.error('[Hiya] Speech recognition error:', error);
+        showNotification('Speech recognition failed');
+      }
+    }
+  }
+  // Only trigger voice input for text-like fields
+  else if (shouldUseVoiceInput(field.type)) {
+    console.log('[Hiya] Text field detected, starting voice input. Type:', field.type);
+    // Wait a bit to ensure TTS is completely done and audio buffer is clear
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    playBeep();
+
+    // Small delay after beep before starting recognition
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    try {
+      console.log('[Hiya] Starting speech recognition');
+      const transcript = await startSpeechRecognition();
+      console.log('[Hiya] Transcript received:', transcript);
+      if (transcript) {
+        formDetector.fillCurrentField(transcript);
+        showNotification(`Filled: ${transcript}`);
+        await speak(`Filled with: ${transcript}`);
+      }
+    } catch (error) {
+      console.error('[Hiya] Speech recognition error:', error);
+      showNotification('Speech recognition failed');
+    }
+  } else {
+    console.log('[Hiya] Unsupported field type:', field.type);
+  }
+}
+
+/**
  * Speaks text using the Web Speech API
  */
 function speak(text: string): Promise<void> {
@@ -389,34 +483,7 @@ async function handleNextField() {
     showNotification(`Now at: ${field.label}`);
     console.log('[Hiya] Speaking field label:', field.label);
     await speak(field.label);
-
-    // Only trigger voice input for text-like fields (not radio, checkbox, etc.)
-    if (shouldUseVoiceInput(field.type)) {
-      console.log('[Hiya] Text field detected, starting voice input. Type:', field.type);
-      // Wait a bit to ensure TTS is completely done and audio buffer is clear
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      playBeep();
-
-      // Small delay after beep before starting recognition
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      try {
-        console.log('[Hiya] Starting speech recognition');
-        const transcript = await startSpeechRecognition();
-        console.log('[Hiya] Transcript received:', transcript);
-        if (transcript) {
-          formDetector.fillCurrentField(transcript);
-          showNotification(`Filled: ${transcript}`);
-          await speak(`Filled with: ${transcript}`);
-        }
-      } catch (error) {
-        console.error('[Hiya] Speech recognition error:', error);
-        showNotification('Speech recognition failed');
-      }
-    } else {
-      console.log('[Hiya] Not a text field, skipping voice input. Type:', field.type);
-    }
+    await handleVoiceInputForField(field);
   } else {
     console.log('[Hiya] No field returned from nextField()');
   }
@@ -428,29 +495,7 @@ async function handlePreviousField() {
   if (field) {
     showNotification(`Now at: ${field.label}`);
     await speak(field.label);
-
-    // Only trigger voice input for text-like fields (not radio, checkbox, etc.)
-    if (shouldUseVoiceInput(field.type)) {
-      // Wait a bit to ensure TTS is completely done and audio buffer is clear
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      playBeep();
-
-      // Small delay after beep before starting recognition
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      try {
-        const transcript = await startSpeechRecognition();
-        if (transcript) {
-          formDetector.fillCurrentField(transcript);
-          showNotification(`Filled: ${transcript}`);
-          await speak(`Filled with: ${transcript}`);
-        }
-      } catch (error) {
-        console.error('[Hiya] Speech recognition error:', error);
-        showNotification('Speech recognition failed');
-      }
-    }
+    await handleVoiceInputForField(field);
   }
 }
 
@@ -460,29 +505,7 @@ async function handleJumpToUnfilled() {
   if (field) {
     showNotification(`Jumped to: ${field.label}`);
     await speak(field.label);
-
-    // Only trigger voice input for text-like fields (not radio, checkbox, etc.)
-    if (shouldUseVoiceInput(field.type)) {
-      // Wait a bit to ensure TTS is completely done and audio buffer is clear
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      playBeep();
-
-      // Small delay after beep before starting recognition
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      try {
-        const transcript = await startSpeechRecognition();
-        if (transcript) {
-          formDetector.fillCurrentField(transcript);
-          showNotification(`Filled: ${transcript}`);
-          await speak(`Filled with: ${transcript}`);
-        }
-      } catch (error) {
-        console.error('[Hiya] Speech recognition error:', error);
-        showNotification('Speech recognition failed');
-      }
-    }
+    await handleVoiceInputForField(field);
   } else {
     showNotification('All required fields are filled!');
     await speak('All required fields are filled!');
