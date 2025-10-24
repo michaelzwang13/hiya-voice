@@ -420,3 +420,142 @@
   gap: 8px;
   margin-bottom: 8px;
 }
+
+/* Insert Phrases Section */
+.hiya-insert-section {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.hiya-insert-help {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.hiya-insert-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hiya-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.hiya-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hiya-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.hiya-textarea {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.hiya-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hiya-textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.hiya-phrases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.hiya-phrases-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.hiya-phrases-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.hiya-phrases-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.hiya-no-phrases {
+  font-size: 13px;
+  opacity: 0.6;
+  text-align: center;
+  padding: 12px;
+}
+
+.hiya-phrase-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hiya-phrase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.hiya-phrase-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hiya-phrase-delete {
+  background: rgba(255, 59, 48, 0.3);
+  border: 1px solid rgba(255, 59, 48, 0.5);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.hiya-phrase-delete:hover {
+  background: rgba(255, 59, 48, 0.5);
+  transform: scale(1.1);
+}
+
+.hiya-phrase-content {
+  font-size: 12px;
+  opacity: 0.9;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

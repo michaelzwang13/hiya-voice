@@ -49,3 +49,9 @@ export interface VoiceCommand {
   text: string;
   target?: string;
 }
+
+export interface InsertPhrase {
+  id: string;
+  name: string;
+  content: string;
+}

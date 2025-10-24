@@ -1,6 +1,7 @@
 import { FormDetector } from '../utils/form-detector';
 import { VoiceAssistantOverlay } from '../components/overlay';
 import type { Message } from '../types/messages';
+import type { InsertPhrase } from '../types/form';
 
 console.log('[Hiya] Content script loaded');
 
@@ -8,10 +9,12 @@ const formDetector = new FormDetector();
 let overlay: VoiceAssistantOverlay | null = null;
 let isExtensionEnabled = true;
 let activeRecognition: any = null; // Track active speech recognition
+let insertPhrases: InsertPhrase[] = []; // Store insert phrases
 
-// Check if extension is enabled
-chrome.storage.local.get(['extensionEnabled'], (result) => {
+// Check if extension is enabled and load insert phrases
+chrome.storage.local.get(['extensionEnabled', 'insertPhrases'], (result) => {
   isExtensionEnabled = result.extensionEnabled !== false; // Default to true
+  insertPhrases = result.insertPhrases || [];
 
   if (isExtensionEnabled) {
     initializeExtension();
@@ -72,6 +75,11 @@ function initializeExtension() {
   overlay.onNextField = handleNextField;
   overlay.onPreviousField = handlePreviousField;
   overlay.onJumpToUnfilled = handleJumpToUnfilled;
+  overlay.onAddPhrase = handleAddPhrase;
+  overlay.onDeletePhrase = handleDeletePhrase;
+
+  // Update phrases list
+  overlay.updatePhrasesList(insertPhrases);
 
   // Detect forms if page already loaded
   if (document.readyState === 'complete') {
@@ -268,9 +276,26 @@ async function handleVoiceInputForField(field: any) {
       const transcript = await startSpeechRecognition();
       console.log('[Hiya] Transcript received:', transcript);
       if (transcript) {
-        formDetector.fillCurrentField(transcript);
-        showNotification(`Filled: ${transcript}`);
-        await speak(`Filled with: ${transcript}`);
+        // Check if this is an "insert" command
+        const insertMatch = transcript.toLowerCase().match(/^insert\s+(.+)$/);
+        if (insertMatch) {
+          const phraseName = insertMatch[1].trim();
+          const phrase = findInsertPhrase(phraseName);
+
+          if (phrase) {
+            formDetector.fillCurrentField(phrase.content);
+            showNotification(`Inserted phrase: ${phrase.name}`);
+            await speak(`Inserted ${phrase.name}`);
+          } else {
+            showNotification(`Phrase "${phraseName}" not found`);
+            await speak(`Phrase ${phraseName} not found. Please add it first.`);
+          }
+        } else {
+          // Regular text input
+          formDetector.fillCurrentField(transcript);
+          showNotification(`Filled: ${transcript}`);
+          await speak(`Filled with: ${transcript}`);
+        }
       }
     } catch (error) {
       console.error('[Hiya] Speech recognition error:', error);
@@ -561,6 +586,48 @@ function updateOverlayCurrentField() {
     ...formDetector.getFormState(),
   };
   overlay.updateFormStatus(formInfo);
+}
+
+/**
+ * Handles adding a new insert phrase
+ */
+function handleAddPhrase(name: string, content: string) {
+  const newPhrase: InsertPhrase = {
+    id: Date.now().toString(),
+    name: name.toLowerCase(), // Store in lowercase for easier matching
+    content
+  };
+
+  insertPhrases.push(newPhrase);
+
+  // Save to chrome storage
+  chrome.storage.local.set({ insertPhrases }, () => {
+    console.log('[Hiya] Phrase added:', newPhrase);
+    overlay?.updatePhrasesList(insertPhrases);
+    showNotification(`Phrase "${name}" added!`);
+  });
+}
+
+/**
+ * Handles deleting an insert phrase
+ */
+function handleDeletePhrase(id: string) {
+  insertPhrases = insertPhrases.filter(phrase => phrase.id !== id);
+
+  // Save to chrome storage
+  chrome.storage.local.set({ insertPhrases }, () => {
+    console.log('[Hiya] Phrase deleted:', id);
+    overlay?.updatePhrasesList(insertPhrases);
+    showNotification('Phrase deleted');
+  });
+}
+
+/**
+ * Finds an insert phrase by name (case-insensitive)
+ */
+function findInsertPhrase(name: string): InsertPhrase | undefined {
+  const normalizedName = name.toLowerCase().trim();
+  return insertPhrases.find(phrase => phrase.name === normalizedName);
 }
 
 export {};

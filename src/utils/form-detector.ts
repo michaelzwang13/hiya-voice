@@ -11,10 +11,10 @@ export class FormDetector {
   detectForms(): FormInfo {
     this.fields = [];
 
-    // Find all input, textarea, and select elements
+    // Find all input, textarea, and select elements, excluding those in the Hiya overlay
     const inputElements = Array.from(
       document.querySelectorAll('input, textarea, select')
-    );
+    ).filter(element => !element.closest('#hiya-overlay-container'));
 
     inputElements.forEach((element, index) => {
       const field = this.createFormField(element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, index);
@@ -25,7 +25,7 @@ export class FormDetector {
 
     const ariaElements = Array.from(
       document.querySelectorAll('[role="radio"]')
-    );
+    ).filter(element => !element.closest('#hiya-overlay-container'));
 
     const radioGroups: { [key: string]: Element[] } = {};
 
@@ -46,10 +46,10 @@ export class FormDetector {
       }
     }
 
-    // Find all ARIA checkboxes and group them
+    // Find all ARIA checkboxes and group them, excluding those in the Hiya overlay
     const ariaCheckboxes = Array.from(
       document.querySelectorAll('[role="checkbox"]')
-    );
+    ).filter(element => !element.closest('#hiya-overlay-container'));
 
     const checkboxGroups: { [key: string]: Element[] } = {};
 

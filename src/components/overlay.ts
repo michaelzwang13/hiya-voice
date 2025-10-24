@@ -1,4 +1,4 @@
-import type { FormField, FormInfo } from '../types/form';
+import type { FormField, FormInfo, InsertPhrase } from '../types/form';
 
 export class VoiceAssistantOverlay {
   private container: HTMLElement | null = null;
@@ -11,6 +11,8 @@ export class VoiceAssistantOverlay {
   public onNextField?: () => void;
   public onPreviousField?: () => void;
   public onJumpToUnfilled?: () => void;
+  public onAddPhrase?: (name: string, content: string) => void;
+  public onDeletePhrase?: (id: string) => void;
 
   constructor() {
     this.injectOverlay();
@@ -94,6 +96,21 @@ export class VoiceAssistantOverlay {
               Jump to Required
             </button>
           </div>
+
+          <div class="hiya-insert-section">
+            <div class="hiya-section-title">Insert Phrases</div>
+            <div class="hiya-insert-help">
+              Say "insert [phrase name]" to use a saved phrase
+            </div>
+            <div class="hiya-insert-form">
+              <input type="text" id="hiya-phrase-name" class="hiya-input" placeholder="Phrase name (e.g., 'resume')">
+              <textarea id="hiya-phrase-content" class="hiya-textarea" placeholder="Content to insert..." rows="3"></textarea>
+              <button id="hiya-add-phrase" class="hiya-btn hiya-btn-primary">Add Phrase</button>
+            </div>
+            <div id="hiya-phrases-list" class="hiya-phrases-list">
+              <!-- Phrases will be dynamically added here -->
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -142,6 +159,35 @@ export class VoiceAssistantOverlay {
 
     const jumpBtn = document.getElementById('hiya-jump-unfilled');
     jumpBtn?.addEventListener('click', () => this.onJumpToUnfilled?.());
+
+    // Insert phrase button
+    const addPhraseBtn = document.getElementById('hiya-add-phrase');
+    addPhraseBtn?.addEventListener('click', () => this.handleAddPhrase());
+  }
+
+  /**
+   * Handles adding a new phrase
+   */
+  private handleAddPhrase(): void {
+    const nameInput = document.getElementById('hiya-phrase-name') as HTMLInputElement;
+    const contentInput = document.getElementById('hiya-phrase-content') as HTMLTextAreaElement;
+
+    if (!nameInput || !contentInput) return;
+
+    const name = nameInput.value.trim();
+    const content = contentInput.value.trim();
+
+    if (!name || !content) {
+      alert('Please enter both phrase name and content');
+      return;
+    }
+
+    // Call the handler
+    this.onAddPhrase?.(name, content);
+
+    // Clear inputs
+    nameInput.value = '';
+    contentInput.value = '';
   }
 
   /**
@@ -235,6 +281,50 @@ export class VoiceAssistantOverlay {
     if (fieldValueEl) {
       fieldValueEl.textContent = field.value || 'Empty';
     }
+  }
+
+  /**
+   * Updates the phrases list display
+   */
+  public updatePhrasesList(phrases: InsertPhrase[]): void {
+    const phrasesList = document.getElementById('hiya-phrases-list');
+    if (!phrasesList) return;
+
+    if (phrases.length === 0) {
+      phrasesList.innerHTML = '<div class="hiya-no-phrases">No phrases saved yet</div>';
+      return;
+    }
+
+    phrasesList.innerHTML = phrases.map(phrase => `
+      <div class="hiya-phrase-item" data-phrase-id="${phrase.id}">
+        <div class="hiya-phrase-header">
+          <strong class="hiya-phrase-name">${this.escapeHtml(phrase.name)}</strong>
+          <button class="hiya-phrase-delete" data-phrase-id="${phrase.id}" title="Delete phrase">×</button>
+        </div>
+        <div class="hiya-phrase-content">${this.escapeHtml(phrase.content)}</div>
+      </div>
+    `).join('');
+
+    // Add delete button listeners
+    const deleteButtons = phrasesList.querySelectorAll('.hiya-phrase-delete');
+    deleteButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const phraseId = target.getAttribute('data-phrase-id');
+        if (phraseId) {
+          this.onDeletePhrase?.(phraseId);
+        }
+      });
+    });
+  }
+
+  /**
+   * Escapes HTML to prevent XSS
+   */
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**
