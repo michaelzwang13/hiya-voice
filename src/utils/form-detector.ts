@@ -3,7 +3,7 @@ import type { FormField, FormInfo, FieldType } from '../types/form';
 export class FormDetector {
   private fields: FormField[] = [];
   private currentFieldIndex = -1;
-  private readonly HIGHLIGHT_CLASS = 'hiya-current-field';
+  private readonly HIGHLIGHT_CLASS = 'clara-current-field';
 
   /**
    * Detects all form fields on the current page
@@ -11,10 +11,10 @@ export class FormDetector {
   detectForms(): FormInfo {
     this.fields = [];
 
-    // Find all input, textarea, and select elements, excluding those in the Hiya overlay
+    // Find all input, textarea, and select elements, excluding those in the Clara overlay
     const inputElements = Array.from(
       document.querySelectorAll('input, textarea, select')
-    ).filter(element => !element.closest('#hiya-overlay-container'));
+    ).filter(element => !element.closest('#clara-overlay-container'));
 
     inputElements.forEach((element, index) => {
       const field = this.createFormField(element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, index);
@@ -25,7 +25,7 @@ export class FormDetector {
 
     const ariaElements = Array.from(
       document.querySelectorAll('[role="radio"]')
-    ).filter(element => !element.closest('#hiya-overlay-container'));
+    ).filter(element => !element.closest('#clara-overlay-container'));
 
     const radioGroups: { [key: string]: Element[] } = {};
 
@@ -46,10 +46,10 @@ export class FormDetector {
       }
     }
 
-    // Find all ARIA checkboxes and group them, excluding those in the Hiya overlay
+    // Find all ARIA checkboxes and group them, excluding those in the Clara overlay
     const ariaCheckboxes = Array.from(
       document.querySelectorAll('[role="checkbox"]')
-    ).filter(element => !element.closest('#hiya-overlay-container'));
+    ).filter(element => !element.closest('#clara-overlay-container'));
 
     const checkboxGroups: { [key: string]: Element[] } = {};
 
@@ -79,7 +79,7 @@ export class FormDetector {
     const requiredFields = this.fields.filter(f => f.required).length;
     const filledFields = this.fields.filter(f => f.value.trim() !== '').length;
 
-    console.log(`[Hiya] Detected ${this.fields.length} form fields`);
+    console.log(`[Clara] Detected ${this.fields.length} form fields`);
 
     return {
       fields: this.fields,
@@ -116,7 +116,7 @@ export class FormDetector {
       placeholder: element.getAttribute('placeholder') || undefined,
       required: element.required || element.getAttribute('aria-required') === 'true',
       value: this.getFieldValue(element),
-      id: element.id || `hiya-field-${index}`,
+      id: element.id || `clara-field-${index}`,
     };
   }
 
@@ -139,7 +139,7 @@ export class FormDetector {
     let radioField: HTMLElement;
     let label = 'Unlabeled radio group';
     let required = false;
-    let id = `hiya-aria-radio-${index}`;
+    let id = `clara-aria-radio-${index}`;
 
     const radioGroup = elements[0].closest('[role="radiogroup"]');
 
@@ -247,7 +247,7 @@ export class FormDetector {
     let checkboxField: HTMLElement;
     let label = 'Unlabeled checkbox group';
     let required = false;
-    let id = `hiya-aria-checkbox-${index}`;
+    let id = `clara-aria-checkbox-${index}`;
 
     // Try to find parent group - go two levels up for checkboxes
     const group = elements[0].closest('[role="group"]');
@@ -712,10 +712,10 @@ export class FormDetector {
    * Injects CSS styles for field highlighting
    */
   private injectHighlightStyles(): void {
-    if (document.getElementById('hiya-highlight-styles')) return;
+    if (document.getElementById('clara-highlight-styles')) return;
 
     const style = document.createElement('style');
-    style.id = 'hiya-highlight-styles';
+    style.id = 'clara-highlight-styles';
     style.textContent = `
       .${this.HIGHLIGHT_CLASS} {
         outline: 3px solid #4F46E5 !important;

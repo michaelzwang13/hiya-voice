@@ -1,4 +1,4 @@
-console.log('[Hiya] Popup script loaded');
+console.log('[Clara] Popup script loaded');
 
 // Get DOM elements
 const extensionToggle = document.getElementById('extension-toggle') as HTMLInputElement;
@@ -31,7 +31,7 @@ extensionToggle.addEventListener('change', async () => {
       });
     }
   } catch (error) {
-    console.log('[Hiya] Could not send message to content script:', error);
+    console.log('[Clara] Could not send message to content script:', error);
   }
 });
 

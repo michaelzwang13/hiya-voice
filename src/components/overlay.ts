@@ -26,88 +26,88 @@ export class VoiceAssistantOverlay {
   private injectOverlay(): void {
     // Create container
     this.container = document.createElement('div');
-    this.container.id = 'hiya-overlay-container';
+    this.container.id = 'clara-overlay-container';
 
     // Fetch and inject the HTML
     const overlayHTML = `
-      <div id="hiya-overlay" class="hiya-overlay">
-        <div class="hiya-resize-handle"></div>
+      <div id="clara-overlay" class="clara-overlay">
+        <div class="clara-resize-handle"></div>
 
         <!-- Minimized Tab (visible when overlay is minimized) -->
-        <div class="hiya-minimized-tab" id="hiya-minimized-tab">
-          <div class="hiya-tab-content">
-            <span class="hiya-tab-icon">🎙️</span>
-            <span class="hiya-tab-text">Hiya</span>
+        <div class="clara-minimized-tab" id="clara-minimized-tab">
+          <div class="clara-tab-content">
+            <span class="clara-tab-icon">🎙️</span>
+            <span class="clara-tab-text">Clara</span>
           </div>
         </div>
 
-        <div class="hiya-header">
-          <div class="hiya-title">
-            <span class="hiya-icon">🎙️</span>
-            <span>Hiya Voice Assistant</span>
+        <div class="clara-header">
+          <div class="clara-title">
+            <span class="clara-icon">🎙️</span>
+            <span>Clara Voice Assistant</span>
           </div>
-          <button class="hiya-toggle-btn" id="hiya-toggle" title="Toggle Sidebar (Ctrl+B)">
-            <span class="hiya-toggle-icon">−</span>
+          <button class="clara-toggle-btn" id="clara-toggle" title="Toggle Sidebar (Ctrl+B)">
+            <span class="clara-toggle-icon">−</span>
           </button>
         </div>
 
-        <div class="hiya-content">
-          <div class="hiya-status-section">
-            <div class="hiya-status-item">
-              <span class="hiya-label">Form Status:</span>
-              <span id="hiya-form-status" class="hiya-value">No form detected</span>
+        <div class="clara-content">
+          <div class="clara-status-section">
+            <div class="clara-status-item">
+              <span class="clara-label">Form Status:</span>
+              <span id="clara-form-status" class="clara-value">No form detected</span>
             </div>
-            <div class="hiya-status-item">
-              <span class="hiya-label">Fields:</span>
-              <span id="hiya-fields-count" class="hiya-value">0</span>
+            <div class="clara-status-item">
+              <span class="clara-label">Fields:</span>
+              <span id="clara-fields-count" class="clara-value">0</span>
             </div>
-            <div class="hiya-status-item">
-              <span class="hiya-label">Progress:</span>
-              <div class="hiya-progress-container">
-                <div id="hiya-progress-bar" class="hiya-progress-bar" style="width: 0%"></div>
-                <span id="hiya-progress-text" class="hiya-progress-text">0%</span>
+            <div class="clara-status-item">
+              <span class="clara-label">Progress:</span>
+              <div class="clara-progress-container">
+                <div id="clara-progress-bar" class="clara-progress-bar" style="width: 0%"></div>
+                <span id="clara-progress-text" class="clara-progress-text">0%</span>
               </div>
             </div>
           </div>
 
-          <div class="hiya-current-field-section">
-            <div class="hiya-section-title">Current Field</div>
-            <div class="hiya-current-field">
-              <div class="hiya-field-info">
-                <span id="hiya-field-index" class="hiya-field-index">-</span>
-                <span id="hiya-field-label" class="hiya-field-label">No field selected</span>
+          <div class="clara-current-field-section">
+            <div class="clara-section-title">Current Field</div>
+            <div class="clara-current-field">
+              <div class="clara-field-info">
+                <span id="clara-field-index" class="clara-field-index">-</span>
+                <span id="clara-field-label" class="clara-field-label">No field selected</span>
               </div>
-              <div id="hiya-field-type" class="hiya-field-type">-</div>
-              <div id="hiya-field-value" class="hiya-field-value">Empty</div>
+              <div id="clara-field-type" class="clara-field-type">-</div>
+              <div id="clara-field-value" class="clara-field-value">Empty</div>
             </div>
           </div>
 
-          <div class="hiya-controls-section">
-            <div class="hiya-section-title">Navigation</div>
-            <div class="hiya-controls">
-              <button id="hiya-prev-btn" class="hiya-btn hiya-btn-secondary">
+          <div class="clara-controls-section">
+            <div class="clara-section-title">Navigation</div>
+            <div class="clara-controls">
+              <button id="clara-prev-btn" class="clara-btn clara-btn-secondary">
                 ← Previous
               </button>
-              <button id="hiya-next-btn" class="hiya-btn hiya-btn-secondary">
+              <button id="clara-next-btn" class="clara-btn clara-btn-secondary">
                 Next →
               </button>
             </div>
-            <button id="hiya-jump-unfilled" class="hiya-btn hiya-btn-outline">
+            <button id="clara-jump-unfilled" class="clara-btn clara-btn-outline">
               Jump to Required
             </button>
           </div>
 
-          <div class="hiya-insert-section">
-            <div class="hiya-section-title">Insert Phrases</div>
-            <div class="hiya-insert-help">
+          <div class="clara-insert-section">
+            <div class="clara-section-title">Insert Phrases</div>
+            <div class="clara-insert-help">
               Say "insert [phrase name]" to use a saved phrase
             </div>
-            <div class="hiya-insert-form">
-              <input type="text" id="hiya-phrase-name" class="hiya-input" placeholder="Phrase name (e.g., 'resume')">
-              <textarea id="hiya-phrase-content" class="hiya-textarea" placeholder="Content to insert..." rows="3"></textarea>
-              <button id="hiya-add-phrase" class="hiya-btn hiya-btn-primary">Add Phrase</button>
+            <div class="clara-insert-form">
+              <input type="text" id="clara-phrase-name" class="clara-input" placeholder="Phrase name (e.g., 'resume')">
+              <textarea id="clara-phrase-content" class="clara-textarea" placeholder="Content to insert..." rows="3"></textarea>
+              <button id="clara-add-phrase" class="clara-btn clara-btn-primary">Add Phrase</button>
             </div>
-            <div id="hiya-phrases-list" class="hiya-phrases-list">
+            <div id="clara-phrases-list" class="clara-phrases-list">
               <!-- Phrases will be dynamically added here -->
             </div>
           </div>
@@ -128,7 +128,7 @@ export class VoiceAssistantOverlay {
    * Injects the CSS styles
    */
   private injectStyles(): void {
-    const styleId = 'hiya-overlay-styles';
+    const styleId = 'clara-overlay-styles';
     if (document.getElementById(styleId)) return;
 
     const link = document.createElement('link');
@@ -143,25 +143,25 @@ export class VoiceAssistantOverlay {
    */
   private attachEventListeners(): void {
     // Toggle minimize
-    const toggleBtn = document.getElementById('hiya-toggle');
+    const toggleBtn = document.getElementById('clara-toggle');
     toggleBtn?.addEventListener('click', () => this.toggle());
 
     // Click minimized tab to expand
-    const minimizedTab = document.getElementById('hiya-minimized-tab');
+    const minimizedTab = document.getElementById('clara-minimized-tab');
     minimizedTab?.addEventListener('click', () => this.show());
 
     // Navigation buttons
-    const nextBtn = document.getElementById('hiya-next-btn');
+    const nextBtn = document.getElementById('clara-next-btn');
     nextBtn?.addEventListener('click', () => this.onNextField?.());
 
-    const prevBtn = document.getElementById('hiya-prev-btn');
+    const prevBtn = document.getElementById('clara-prev-btn');
     prevBtn?.addEventListener('click', () => this.onPreviousField?.());
 
-    const jumpBtn = document.getElementById('hiya-jump-unfilled');
+    const jumpBtn = document.getElementById('clara-jump-unfilled');
     jumpBtn?.addEventListener('click', () => this.onJumpToUnfilled?.());
 
     // Insert phrase button
-    const addPhraseBtn = document.getElementById('hiya-add-phrase');
+    const addPhraseBtn = document.getElementById('clara-add-phrase');
     addPhraseBtn?.addEventListener('click', () => this.handleAddPhrase());
   }
 
@@ -169,8 +169,8 @@ export class VoiceAssistantOverlay {
    * Handles adding a new phrase
    */
   private handleAddPhrase(): void {
-    const nameInput = document.getElementById('hiya-phrase-name') as HTMLInputElement;
-    const contentInput = document.getElementById('hiya-phrase-content') as HTMLTextAreaElement;
+    const nameInput = document.getElementById('clara-phrase-name') as HTMLInputElement;
+    const contentInput = document.getElementById('clara-phrase-content') as HTMLTextAreaElement;
 
     if (!nameInput || !contentInput) return;
 
@@ -194,8 +194,8 @@ export class VoiceAssistantOverlay {
    * Sets up resizing functionality
    */
   private setupResizing(): void {
-    const resizeHandle = document.querySelector('.hiya-resize-handle') as HTMLElement;
-    const overlay = document.getElementById('hiya-overlay') as HTMLElement;
+    const resizeHandle = document.querySelector('.clara-resize-handle') as HTMLElement;
+    const overlay = document.getElementById('clara-overlay') as HTMLElement;
 
     if (!resizeHandle || !overlay) return;
 
@@ -227,10 +227,10 @@ export class VoiceAssistantOverlay {
    * Updates the form status display
    */
   public updateFormStatus(formInfo: FormInfo): void {
-    const statusEl = document.getElementById('hiya-form-status');
-    const fieldsCountEl = document.getElementById('hiya-fields-count');
-    const progressBar = document.getElementById('hiya-progress-bar');
-    const progressText = document.getElementById('hiya-progress-text');
+    const statusEl = document.getElementById('clara-form-status');
+    const fieldsCountEl = document.getElementById('clara-fields-count');
+    const progressBar = document.getElementById('clara-progress-bar');
+    const progressText = document.getElementById('clara-progress-text');
 
     if (statusEl) {
       statusEl.textContent = formInfo.totalFields > 0 ? 'Form detected' : 'No form detected';
@@ -253,10 +253,10 @@ export class VoiceAssistantOverlay {
    * Updates the current field display
    */
   public updateCurrentField(field: FormField | null, index: number, total: number): void {
-    const fieldIndexEl = document.getElementById('hiya-field-index');
-    const fieldLabelEl = document.getElementById('hiya-field-label');
-    const fieldTypeEl = document.getElementById('hiya-field-type');
-    const fieldValueEl = document.getElementById('hiya-field-value');
+    const fieldIndexEl = document.getElementById('clara-field-index');
+    const fieldLabelEl = document.getElementById('clara-field-label');
+    const fieldTypeEl = document.getElementById('clara-field-type');
+    const fieldValueEl = document.getElementById('clara-field-value');
 
     if (!field) {
       if (fieldIndexEl) fieldIndexEl.textContent = '-';
@@ -287,26 +287,26 @@ export class VoiceAssistantOverlay {
    * Updates the phrases list display
    */
   public updatePhrasesList(phrases: InsertPhrase[]): void {
-    const phrasesList = document.getElementById('hiya-phrases-list');
+    const phrasesList = document.getElementById('clara-phrases-list');
     if (!phrasesList) return;
 
     if (phrases.length === 0) {
-      phrasesList.innerHTML = '<div class="hiya-no-phrases">No phrases saved yet</div>';
+      phrasesList.innerHTML = '<div class="clara-no-phrases">No phrases saved yet</div>';
       return;
     }
 
     phrasesList.innerHTML = phrases.map(phrase => `
-      <div class="hiya-phrase-item" data-phrase-id="${phrase.id}">
-        <div class="hiya-phrase-header">
-          <strong class="hiya-phrase-name">${this.escapeHtml(phrase.name)}</strong>
-          <button class="hiya-phrase-delete" data-phrase-id="${phrase.id}" title="Delete phrase">×</button>
+      <div class="clara-phrase-item" data-phrase-id="${phrase.id}">
+        <div class="clara-phrase-header">
+          <strong class="clara-phrase-name">${this.escapeHtml(phrase.name)}</strong>
+          <button class="clara-phrase-delete" data-phrase-id="${phrase.id}" title="Delete phrase">×</button>
         </div>
-        <div class="hiya-phrase-content">${this.escapeHtml(phrase.content)}</div>
+        <div class="clara-phrase-content">${this.escapeHtml(phrase.content)}</div>
       </div>
     `).join('');
 
     // Add delete button listeners
-    const deleteButtons = phrasesList.querySelectorAll('.hiya-phrase-delete');
+    const deleteButtons = phrasesList.querySelectorAll('.clara-phrase-delete');
     deleteButtons.forEach(btn => {
       btn.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
@@ -331,8 +331,8 @@ export class VoiceAssistantOverlay {
    * Toggles the overlay visibility
    */
   public toggle(): void {
-    const overlay = document.getElementById('hiya-overlay');
-    const toggleIcon = document.querySelector('.hiya-toggle-icon');
+    const overlay = document.getElementById('clara-overlay');
+    const toggleIcon = document.querySelector('.clara-toggle-icon');
 
     if (!overlay) return;
 
@@ -351,8 +351,8 @@ export class VoiceAssistantOverlay {
    * Shows the overlay
    */
   public show(): void {
-    const overlay = document.getElementById('hiya-overlay');
-    const toggleIcon = document.querySelector('.hiya-toggle-icon');
+    const overlay = document.getElementById('clara-overlay');
+    const toggleIcon = document.querySelector('.clara-toggle-icon');
 
     if (overlay) {
       overlay.classList.remove('minimized');
@@ -365,8 +365,8 @@ export class VoiceAssistantOverlay {
    * Hides the overlay
    */
   public hide(): void {
-    const overlay = document.getElementById('hiya-overlay');
-    const toggleIcon = document.querySelector('.hiya-toggle-icon');
+    const overlay = document.getElementById('clara-overlay');
+    const toggleIcon = document.querySelector('.clara-toggle-icon');
 
     if (overlay) {
       overlay.classList.add('minimized');
@@ -380,6 +380,6 @@ export class VoiceAssistantOverlay {
    */
   public destroy(): void {
     this.container?.remove();
-    document.getElementById('hiya-overlay-styles')?.remove();
+    document.getElementById('clara-overlay-styles')?.remove();
   }
 }

@@ -1,4 +1,4 @@
-# Hiya Voice Assistant
+# Clara Voice Assistant
 
 Voice-powered form filling assistant for accessibility. Helps users with visual or physical impairments fill out forms using voice commands.
 
@@ -6,7 +6,7 @@ Voice-powered form filling assistant for accessibility. Helps users with visual 
 
 ### Project Structure
 ```
-hiya-voice/
+clara-voice/
 ├── src/
 │   ├── background/          # Background service worker
 │   ├── content/             # Content scripts (injected into pages)
@@ -62,13 +62,13 @@ bun run dev
 2. Enable "Developer mode" (top right toggle)
 3. Click "Load unpacked"
 4. Select the `dist` folder from this project
-5. The Hiya Voice Assistant extension should now appear
+5. The Clara Voice Assistant extension should now appear
 
 ## Testing
 
 ### Test Navigation Features
 1. Navigate to any page with a form (try [Google Forms](https://docs.google.com/forms/))
-2. Click the Hiya extension icon
+2. Click the Clara extension icon
 3. Click "Refresh Forms" to detect fields
 4. Try navigation buttons:
    - **Next →** - Moves to next field (purple highlight appears)
@@ -87,8 +87,8 @@ bun run dev
 
 ### Console Logs
 Open Chrome DevTools (F12) and check for:
-- `[Hiya] Content script loaded`
-- `[Hiya] Detected X form fields`
+- `[Clara] Content script loaded`
+- `[Clara] Detected X form fields`
 - Field labels and types in console
 
 ## Development Commands

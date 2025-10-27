@@ -1,12 +1,10 @@
 import type { Message } from '../types/messages';
 
-console.log('[Hiya] Background service worker loaded');
+console.log('[Clara] Background service worker loaded');
 
-// Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    console.log('[Hiya] Extension installed');
-    // Open welcome page or set default settings
+    console.log('[Clara] Extension installed');
     chrome.storage.local.set({
       templates: [],
       settings: {
@@ -17,9 +15,8 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// Handle keyboard shortcuts
 chrome.commands.onCommand.addListener((command) => {
-  console.log('[Hiya] Command received:', command);
+  console.log('[Clara] Command received:', command);
 
   if (command === 'toggle-voice') {
     // Send message to active tab
@@ -33,7 +30,7 @@ chrome.commands.onCommand.addListener((command) => {
 
 // Handle messages from content scripts and popup
 chrome.runtime.onMessage.addListener((message: Message, _sender, _sendResponse) => {
-  console.log('[Hiya] Background received message:', message);
+  console.log('[Clara] Background received message:', message);
 
   switch (message.type) {
     case 'TOGGLE_VOICE':
@@ -46,7 +43,7 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, _sendResponse) 
       break;
 
     default:
-      console.log('[Hiya] Unknown message type:', message.type);
+      console.log('[Clara] Unknown message type:', message.type);
   }
 
   return true;

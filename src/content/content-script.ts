@@ -3,7 +3,7 @@ import { VoiceAssistantOverlay } from '../components/overlay';
 import type { Message } from '../types/messages';
 import type { InsertPhrase } from '../types/form';
 
-console.log('[Hiya] Content script loaded');
+console.log('[Clara] Content script loaded');
 
 const formDetector = new FormDetector();
 let overlay: VoiceAssistantOverlay | null = null;
@@ -33,14 +33,14 @@ new MutationObserver(async () => {
   const currentUrl = location.href;
   if (currentUrl !== lastUrl) {
     lastUrl = currentUrl;
-    console.log('[Hiya] URL changed, refreshing form detection');
+    console.log('[Clara] URL changed, refreshing form detection');
     await refreshFormDetection();
   }
 }).observe(document, { subtree: true, childList: true });
 
 // Also listen for popstate events (back/forward navigation)
 window.addEventListener('popstate', async () => {
-  console.log('[Hiya] Navigation detected (popstate), refreshing form detection');
+  console.log('[Clara] Navigation detected (popstate), refreshing form detection');
   await refreshFormDetection();
 });
 
@@ -51,14 +51,14 @@ async function refreshFormDetection() {
   if (!isExtensionEnabled) return;
 
   const formInfo = formDetector.detectForms();
-  console.log('[Hiya] Form detection complete:', formInfo);
+  console.log('[Clara] Form detection complete:', formInfo);
 
   if (overlay) {
     overlay.updateFormStatus(formInfo);
 
     // Don't auto-navigate to first field, just show welcome message
     if (formInfo.totalFields > 0) {
-      await speak('Welcome to Hi ya Voice. Press Control V to start filling the form.');
+      await speak('Welcome to Clara Voice. Press Control V to start filling the form.');
     }
   }
 }
@@ -89,7 +89,7 @@ function initializeExtension() {
 
 // Listen for messages from popup or background script
 chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) => {
-  console.log('[Hiya] Received message:', message);
+  console.log('[Clara] Received message:', message);
 
   switch (message.type) {
     case 'DETECT_FORMS': {
@@ -201,7 +201,7 @@ function shouldUseVoiceInput(fieldType: string): boolean {
 async function handleVoiceInputForField(field: any) {
   // Handle radio and checkbox groups with option selection
   if (field.type === 'radio' || field.type === 'checkbox') {
-    console.log('[Hiya] Radio/Checkbox field detected, reading options');
+    console.log('[Clara] Radio/Checkbox field detected, reading options');
 
     // Read out all options
     if (field.options && field.options.length > 0) {
@@ -220,7 +220,7 @@ async function handleVoiceInputForField(field: any) {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const transcript = await startSpeechRecognition();
-        console.log('[Hiya] Transcript received:', transcript);
+        console.log('[Clara] Transcript received:', transcript);
 
         if (transcript) {
           // Parse number from transcript (handle "one", "1", "option 1", etc.)
@@ -255,14 +255,14 @@ async function handleVoiceInputForField(field: any) {
           }
         }
       } catch (error) {
-        console.error('[Hiya] Speech recognition error:', error);
+        console.error('[Clara] Speech recognition error:', error);
         showNotification('Speech recognition failed');
       }
     }
   }
   // Only trigger voice input for text-like fields
   else if (shouldUseVoiceInput(field.type)) {
-    console.log('[Hiya] Text field detected, starting voice input. Type:', field.type);
+    console.log('[Clara] Text field detected, starting voice input. Type:', field.type);
     // Wait a bit to ensure TTS is completely done and audio buffer is clear
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -272,9 +272,9 @@ async function handleVoiceInputForField(field: any) {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
-      console.log('[Hiya] Starting speech recognition');
+      console.log('[Clara] Starting speech recognition');
       const transcript = await startSpeechRecognition();
-      console.log('[Hiya] Transcript received:', transcript);
+      console.log('[Clara] Transcript received:', transcript);
       if (transcript) {
         // Check if this is an "insert" command
         const insertMatch = transcript.toLowerCase().match(/^insert\s+(.+)$/);
@@ -298,11 +298,11 @@ async function handleVoiceInputForField(field: any) {
         }
       }
     } catch (error) {
-      console.error('[Hiya] Speech recognition error:', error);
+      console.error('[Clara] Speech recognition error:', error);
       showNotification('Speech recognition failed');
     }
   } else {
-    console.log('[Hiya] Unsupported field type:', field.type);
+    console.log('[Clara] Unsupported field type:', field.type);
   }
 }
 
@@ -402,14 +402,14 @@ function startSpeechRecognition(): Promise<string> {
  */
 function showNotification(message: string, duration = 3000) {
   // Remove any existing notification
-  const existingNotification = document.getElementById('hiya-notification');
+  const existingNotification = document.getElementById('clara-notification');
   if (existingNotification) {
     existingNotification.remove();
   }
 
   // Create notification element
   const notification = document.createElement('div');
-  notification.id = 'hiya-notification';
+  notification.id = 'clara-notification';
   notification.textContent = message;
 
   // Style the notification
@@ -427,15 +427,15 @@ function showNotification(message: string, duration = 3000) {
     fontSize: '14px',
     fontWeight: '500',
     maxWidth: '300px',
-    animation: 'hiya-slide-in 0.3s ease-out',
+    animation: 'clara-slide-in 0.3s ease-out',
   });
 
   // Add animation keyframes
-  if (!document.getElementById('hiya-notification-styles')) {
+  if (!document.getElementById('clara-notification-styles')) {
     const style = document.createElement('style');
-    style.id = 'hiya-notification-styles';
+    style.id = 'clara-notification-styles';
     style.textContent = `
-      @keyframes hiya-slide-in {
+      @keyframes clara-slide-in {
         from {
           transform: translateX(400px);
           opacity: 0;
@@ -445,7 +445,7 @@ function showNotification(message: string, duration = 3000) {
           opacity: 1;
         }
       }
-      @keyframes hiya-slide-out {
+      @keyframes clara-slide-out {
         from {
           transform: translateX(0);
           opacity: 1;
@@ -463,7 +463,7 @@ function showNotification(message: string, duration = 3000) {
 
   // Auto-remove after duration
   setTimeout(() => {
-    notification.style.animation = 'hiya-slide-out 0.3s ease-out';
+    notification.style.animation = 'clara-slide-out 0.3s ease-out';
     setTimeout(() => {
       notification.remove();
     }, 300);
@@ -482,11 +482,11 @@ document.addEventListener('keydown', async (event) => {
     const currentField = formDetector.getCurrentField();
     const currentIndex = formDetector.getCurrentFieldIndex();
 
-    console.log('[Hiya] Ctrl+V pressed. Current field:', currentField, 'Index:', currentIndex);
+    console.log('[Clara] Ctrl+V pressed. Current field:', currentField, 'Index:', currentIndex);
 
     if (currentIndex === -1 || !currentField) {
       // Not on any field yet, go to first field
-      console.log('[Hiya] Navigating to first field');
+      console.log('[Clara] Navigating to first field');
       await handleNextField();
     }
   }
@@ -494,18 +494,23 @@ document.addEventListener('keydown', async (event) => {
   // Control+B (or Command+B on Mac) to toggle sidebar visibility
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b' && !event.shiftKey) {
     event.preventDefault();
-    console.log('[Hiya] Ctrl+B pressed - toggling overlay');
+    console.log('[Clara] Ctrl+B pressed - toggling overlay');
     overlay?.toggle();
   }
 
   // Control+Shift+R (or Command+Shift+R on Mac) to manually refresh form detection
   if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'r') {
     event.preventDefault();
-    console.log('[Hiya] Manual refresh triggered');
+    console.log('[Clara] Manual refresh triggered');
     showNotification('Refreshing form detection...');
     await refreshFormDetection();
     showNotification('Form detection refreshed!');
   }
+
+  // Control+Shift+J or (Command+Shift+J on Mac) to jump to next unfilled form
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'j') {[
+    
+  ]}
 
   // Arrow keys for navigation (only when we have a current field)
   const currentIndex = formDetector.getCurrentFieldIndex();
@@ -513,14 +518,14 @@ document.addEventListener('keydown', async (event) => {
     // Right arrow: Next field
     if (event.key === 'ArrowRight') {
       event.preventDefault();
-      console.log('[Hiya] Arrow Right pressed - navigating to next field');
+      console.log('[Clara] Arrow Right pressed - navigating to next field');
       await handleNextField();
     }
 
     // Left arrow: Previous field
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
-      console.log('[Hiya] Arrow Left pressed - navigating to previous field');
+      console.log('[Clara] Arrow Left pressed - navigating to previous field');
       await handlePreviousField();
     }
   }
@@ -530,17 +535,17 @@ document.addEventListener('keydown', async (event) => {
  * Handler functions for overlay events
  */
 async function handleNextField() {
-  console.log('[Hiya] handleNextField called');
+  console.log('[Clara] handleNextField called');
   const field = formDetector.nextField();
-  console.log('[Hiya] Next field:', field);
+  console.log('[Clara] Next field:', field);
   updateOverlayCurrentField();
   if (field) {
     showNotification(`Now at: ${field.label}`);
-    console.log('[Hiya] Speaking field label:', field.label);
+    console.log('[Clara] Speaking field label:', field.label);
     await speak(field.label);
     await handleVoiceInputForField(field);
   } else {
-    console.log('[Hiya] No field returned from nextField()');
+    console.log('[Clara] No field returned from nextField()');
   }
 }
 
@@ -602,7 +607,7 @@ function handleAddPhrase(name: string, content: string) {
 
   // Save to chrome storage
   chrome.storage.local.set({ insertPhrases }, () => {
-    console.log('[Hiya] Phrase added:', newPhrase);
+    console.log('[Clara] Phrase added:', newPhrase);
     overlay?.updatePhrasesList(insertPhrases);
     showNotification(`Phrase "${name}" added!`);
   });
@@ -616,7 +621,7 @@ function handleDeletePhrase(id: string) {
 
   // Save to chrome storage
   chrome.storage.local.set({ insertPhrases }, () => {
-    console.log('[Hiya] Phrase deleted:', id);
+    console.log('[Clara] Phrase deleted:', id);
     overlay?.updatePhrasesList(insertPhrases);
     showNotification('Phrase deleted');
   });
